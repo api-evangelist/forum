@@ -1,0 +1,410 @@
+openapi: 3.1.0
+info:
+  title: Forum Account Market Data API
+  version: '1.0'
+  description: 'The Forum API provides programmatic access to the Forum perpetual futures exchange.
+
+    Trade attention-based perpetual futures, access real-time market data, and manage your account.
+
+
+    ## Base URL
+
+
+    All endpoints are relative to `https://api.forum.market/v1`.
+
+
+    ## Authentication
+
+
+    Public endpoints (market data, exchange status) require no authentication.
+
+    Private endpoints (orders, positions, account) require HMAC-SHA256 signed requests.
+
+
+    See the [Authentication](/api-reference/authentication) guide for details.
+
+    '
+  contact:
+    name: Forum Support
+    email: contact@forum.market
+    url: https://forum.market
+  termsOfService: https://forum-legal.s3.us-east-2.amazonaws.com/terms-of-service.pdf
+servers:
+- url: https://api.forum.market/v1
+  description: Production
+security:
+- ForumAccessKey: []
+  ForumAccessTimestamp: []
+  ForumAccessSign: []
+tags:
+- name: Market Data
+  description: Order books, tickers, trades, and candles
+paths:
+  /markets/{ticker}/book:
+    get:
+      operationId: getOrderBook
+      summary: Get order book
+      description: Returns the current order book snapshot for a market. Use sequence numbers with WebSocket `book_updates` channel for real-time updates.
+      tags:
+      - Market Data
+      security: []
+      parameters:
+      - $ref: '#/components/parameters/TickerPath'
+      - name: depth
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+        description: Number of price levels per side
+      responses:
+        '200':
+          description: Order book snapshot
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderBook'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /markets/{ticker}/trades:
+    get:
+      operationId: getRecentTrades
+      summary: Get recent trades
+      description: Returns recent public trades for a market. A trade occurs at the price of the maker (resting) order.
+      tags:
+      - Market Data
+      security: []
+      parameters:
+      - $ref: '#/components/parameters/TickerPath'
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 500
+          default: 100
+        description: Maximum number of trades to return
+      - name: cursor
+        in: query
+        schema:
+          type: string
+        description: Opaque pagination cursor from a previous response
+      responses:
+        '200':
+          description: Recent trades
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                - nextCursor
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PublicTrade'
+                  nextCursor:
+                    type: string
+                    nullable: true
+                    description: Opaque cursor for fetching the next page, or null if no more results
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /markets/{ticker}/candles:
+    get:
+      operationId: getCandles
+      summary: Get candlestick data
+      description: Returns OHLCV candlestick data for a market within a time range.
+      tags:
+      - Market Data
+      security: []
+      parameters:
+      - $ref: '#/components/parameters/TickerPath'
+      - name: interval
+        in: query
+        required: true
+        schema:
+          type: string
+          enum:
+          - 1m
+          - 5m
+          - 1d
+        description: Candle interval
+      - name: start
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date-time
+        description: Start time (ISO 8601)
+        example: '2026-02-24T00:00:00.000Z'
+      - name: end
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: End time (ISO 8601). Defaults to current time.
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 2500
+          default: 2500
+        description: Maximum number of candles to return
+      responses:
+        '200':
+          description: Candlestick data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CandlestickRecord'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+components:
+  schemas:
+    PublicTrade:
+      type: object
+      required:
+      - tradeId
+      - ticker
+      - price
+      - quantity
+      - takerSide
+      - timestamp
+      properties:
+        tradeId:
+          type: integer
+          description: Unique trade identifier
+          example: 5678
+        ticker:
+          type: string
+          example: OPENAI
+        price:
+          type: number
+          description: Trade price in cents
+          example: 10550
+        quantity:
+          type: number
+          example: 5
+        takerSide:
+          type: string
+          enum:
+          - buy
+          - sell
+          description: Side of the taker order
+          example: buy
+        timestamp:
+          type: string
+          format: date-time
+          example: '2026-02-25T12:00:00.100Z'
+    ErrorResponse:
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          required:
+          - code
+          - message
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code
+              example: INVALID_PARAMETER
+            message:
+              type: string
+              description: Human-readable error message
+              example: Request validation failed
+            details:
+              type: object
+              description: Additional error details
+              example:
+                fields:
+                - field: ticker
+                  message: Required
+    OrderBook:
+      type: object
+      required:
+      - ticker
+      - bids
+      - asks
+      - seq
+      - updatedAt
+      properties:
+        ticker:
+          type: string
+          example: OPENAI
+        bids:
+          type: array
+          maxItems: 100
+          description: Bid levels sorted by descending price in cents
+          items:
+            $ref: '#/components/schemas/BookLevel'
+        asks:
+          type: array
+          maxItems: 100
+          description: Ask levels sorted by ascending price in cents
+          items:
+            $ref: '#/components/schemas/BookLevel'
+        seq:
+          type: integer
+          description: Sequence number for gap detection
+          example: 12345
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp (ISO 8601)
+          example: '2026-02-25T12:00:00.000Z'
+    CandlestickRecord:
+      type: object
+      required:
+      - ticker
+      - interval
+      - start
+      - open
+      - high
+      - low
+      - close
+      - volume
+      - active
+      properties:
+        ticker:
+          type: string
+          example: OPENAI
+        interval:
+          type: string
+          enum:
+          - 1m
+          - 5m
+          - 1d
+          example: 1m
+        start:
+          type: string
+          format: date-time
+          description: Candle period start time
+          example: '2026-02-25T12:00:00.000Z'
+        open:
+          type: number
+          description: Opening price in cents
+          example: 10500
+        high:
+          type: number
+          description: Highest price in cents
+          example: 10600
+        low:
+          type: number
+          description: Lowest price in cents
+          example: 10450
+        close:
+          type: number
+          description: Closing price in cents
+          example: 10550
+        volume:
+          type: number
+          description: Volume in cents
+          example: 150
+        active:
+          type: boolean
+          description: Whether this candle is still in its active period
+          example: true
+    BookLevel:
+      type: object
+      required:
+      - price
+      - qty
+      properties:
+        price:
+          type: number
+          description: Price level in cents
+          example: 10500
+        qty:
+          type: number
+          description: Total quantity at this price level
+          example: 10
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: NOT_FOUND
+              message: Resource not found
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: INVALID_PARAMETER
+              message: Request validation failed
+              details:
+                fields:
+                - field: ticker
+                  message: Required
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: RATE_LIMIT_EXCEEDED
+              message: Rate limit exceeded. Try again in 5 seconds.
+  parameters:
+    TickerPath:
+      name: ticker
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Market ticker symbol
+      example: OPENAI
+  securitySchemes:
+    ForumAccessKey:
+      type: apiKey
+      in: header
+      name: FORUM-ACCESS-KEY
+      description: Your API key ID (e.g. `fk_a1b2c3d4e5f6...`)
+    ForumAccessTimestamp:
+      type: apiKey
+      in: header
+      name: FORUM-ACCESS-TIMESTAMP
+      description: Unix epoch in seconds (UTC), as a string
+    ForumAccessSign:
+      type: apiKey
+      in: header
+      name: FORUM-ACCESS-SIGN
+      description: 'Base64-encoded HMAC-SHA256 signature.
+
+
+        **Signature generation:**
+
+        ```
+
+        prehash = timestamp + method + requestPath + body
+
+        signature = Base64(HMAC-SHA256(secret, prehash))
+
+        ```
+
+        '

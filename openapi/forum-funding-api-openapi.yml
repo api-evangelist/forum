@@ -1,0 +1,257 @@
+openapi: 3.1.0
+info:
+  title: Forum Account Funding API
+  version: '1.0'
+  description: 'The Forum API provides programmatic access to the Forum perpetual futures exchange.
+
+    Trade attention-based perpetual futures, access real-time market data, and manage your account.
+
+
+    ## Base URL
+
+
+    All endpoints are relative to `https://api.forum.market/v1`.
+
+
+    ## Authentication
+
+
+    Public endpoints (market data, exchange status) require no authentication.
+
+    Private endpoints (orders, positions, account) require HMAC-SHA256 signed requests.
+
+
+    See the [Authentication](/api-reference/authentication) guide for details.
+
+    '
+  contact:
+    name: Forum Support
+    email: contact@forum.market
+    url: https://forum.market
+  termsOfService: https://forum-legal.s3.us-east-2.amazonaws.com/terms-of-service.pdf
+servers:
+- url: https://api.forum.market/v1
+  description: Production
+security:
+- ForumAccessKey: []
+  ForumAccessTimestamp: []
+  ForumAccessSign: []
+tags:
+- name: Funding
+  description: Funding rates and history
+paths:
+  /markets/{ticker}/funding-rate:
+    get:
+      operationId: getFundingRate
+      summary: Get current funding rate
+      description: Returns the last and estimated next funding rate as well as last price, index value, and next funding time for a market.
+      tags:
+      - Funding
+      security: []
+      parameters:
+      - $ref: '#/components/parameters/TickerPath'
+      responses:
+        '200':
+          description: Funding rate information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FundingRateInfo'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /markets/{ticker}/funding-history:
+    get:
+      operationId: getFundingHistory
+      summary: Get funding rate history
+      description: Returns historical funding rates within a time range.
+      tags:
+      - Funding
+      security: []
+      parameters:
+      - $ref: '#/components/parameters/TickerPath'
+      - name: start
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date-time
+        description: Start time (ISO 8601)
+        example: '2026-02-24T00:00:00.000Z'
+      - name: end
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: End time (ISO 8601). Defaults to current time.
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 2500
+          default: 2500
+      responses:
+        '200':
+          description: Funding rate history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FundingHistoryRecord'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          required:
+          - code
+          - message
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code
+              example: INVALID_PARAMETER
+            message:
+              type: string
+              description: Human-readable error message
+              example: Request validation failed
+            details:
+              type: object
+              description: Additional error details
+              example:
+                fields:
+                - field: ticker
+                  message: Required
+    FundingHistoryRecord:
+      type: object
+      required:
+      - ticker
+      - fundingRate
+      - timestamp
+      properties:
+        ticker:
+          type: string
+          example: OPENAI
+        fundingRate:
+          type: number
+          example: 0.0001
+        timestamp:
+          type: string
+          format: date-time
+          example: '2026-02-25T00:00:00.000Z'
+    FundingRateInfo:
+      type: object
+      required:
+      - ticker
+      properties:
+        ticker:
+          type: string
+          example: OPENAI
+        fundingRate:
+          type:
+          - number
+          - 'null'
+          description: Last settled funding rate
+          example: 0.0001
+        movingFundingRate:
+          type:
+          - number
+          - 'null'
+          description: Estimated next funding rate based on the average premium index in the current funding window
+          example: 0.00012
+        lastPrice:
+          type:
+          - number
+          - 'null'
+          description: Last trade price in cents
+          example: 10550
+        indexValue:
+          type:
+          - number
+          - 'null'
+          description: Current attention index value
+          example: 100
+        nextFundingTime:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: Next funding settlement time
+          example: '2026-02-25T08:00:00.000Z'
+  parameters:
+    TickerPath:
+      name: ticker
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Market ticker symbol
+      example: OPENAI
+  responses:
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: INVALID_PARAMETER
+              message: Request validation failed
+              details:
+                fields:
+                - field: ticker
+                  message: Required
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: RATE_LIMIT_EXCEEDED
+              message: Rate limit exceeded. Try again in 5 seconds.
+  securitySchemes:
+    ForumAccessKey:
+      type: apiKey
+      in: header
+      name: FORUM-ACCESS-KEY
+      description: Your API key ID (e.g. `fk_a1b2c3d4e5f6...`)
+    ForumAccessTimestamp:
+      type: apiKey
+      in: header
+      name: FORUM-ACCESS-TIMESTAMP
+      description: Unix epoch in seconds (UTC), as a string
+    ForumAccessSign:
+      type: apiKey
+      in: header
+      name: FORUM-ACCESS-SIGN
+      description: 'Base64-encoded HMAC-SHA256 signature.
+
+
+        **Signature generation:**
+
+        ```
+
+        prehash = timestamp + method + requestPath + body
+
+        signature = Base64(HMAC-SHA256(secret, prehash))
+
+        ```
+
+        '

@@ -1,0 +1,430 @@
+openapi: 3.1.0
+info:
+  title: Forum Account Indices API
+  version: '1.0'
+  description: 'The Forum API provides programmatic access to the Forum perpetual futures exchange.
+
+    Trade attention-based perpetual futures, access real-time market data, and manage your account.
+
+
+    ## Base URL
+
+
+    All endpoints are relative to `https://api.forum.market/v1`.
+
+
+    ## Authentication
+
+
+    Public endpoints (market data, exchange status) require no authentication.
+
+    Private endpoints (orders, positions, account) require HMAC-SHA256 signed requests.
+
+
+    See the [Authentication](/api-reference/authentication) guide for details.
+
+    '
+  contact:
+    name: Forum Support
+    email: contact@forum.market
+    url: https://forum.market
+  termsOfService: https://forum-legal.s3.us-east-2.amazonaws.com/terms-of-service.pdf
+servers:
+- url: https://api.forum.market/v1
+  description: Production
+security:
+- ForumAccessKey: []
+  ForumAccessTimestamp: []
+  ForumAccessSign: []
+tags:
+- name: Indices
+  description: Attention index values and history
+paths:
+  /indices/{name}:
+    get:
+      operationId: getIndex
+      summary: Get index details
+      description: Returns the current attention index value with source breakdown. Forum's indices aggregate attention metrics from social, search, and streaming data to derive the underlying value for contracts.
+      tags:
+      - Indices
+      security: []
+      parameters:
+      - $ref: '#/components/parameters/IndexNamePath'
+      responses:
+        '200':
+          description: Index details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndexRecord'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /indices/{name}/history:
+    get:
+      operationId: getIndexHistory
+      summary: Get index history
+      description: Returns historical index values within a time range.
+      tags:
+      - Indices
+      security: []
+      parameters:
+      - $ref: '#/components/parameters/IndexNamePath'
+      - name: start
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date-time
+        description: Start time (ISO 8601)
+        example: '2026-02-24T00:00:00.000Z'
+      - name: end
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: End time (ISO 8601). Defaults to current time.
+      - name: interval
+        in: query
+        schema:
+          type: string
+          enum:
+          - raw
+          - 8h
+          - 1d
+          default: raw
+        description: Data resolution
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 2500
+          default: 2500
+      responses:
+        '200':
+          description: Index history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IndexHistoryRecord'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          required:
+          - code
+          - message
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code
+              example: INVALID_PARAMETER
+            message:
+              type: string
+              description: Human-readable error message
+              example: Request validation failed
+            details:
+              type: object
+              description: Additional error details
+              example:
+                fields:
+                - field: ticker
+                  message: Required
+    IndexHistoryRecord:
+      type: object
+      required:
+      - id
+      - name
+      - value
+      - raw
+      - timestamp
+      - sourceValues
+      properties:
+        id:
+          type: integer
+          example: 123
+        name:
+          type: string
+          example: OPENAI-IDX
+        value:
+          type: number
+          description: Index value after EMA applied
+          example: 100.5
+        raw:
+          type: number
+          description: Raw index value before EMA
+          example: 100.3
+        timestamp:
+          type: string
+          format: date-time
+          example: '2026-02-25T00:00:00.000Z'
+        sourceValues:
+          type: object
+          additionalProperties:
+            type: number
+          description: Per-source values at this timestamp before weighted sum and EMA
+          example:
+            youtube: 50
+            x: 30
+            reddit: 20.5
+    SourceConfig:
+      type: object
+      required:
+      - name
+      - displayName
+      - picture
+      - weight
+      - frequency
+      - hasHistory
+      - metrics
+      properties:
+        name:
+          type: string
+          description: Source platform identifier
+          enum:
+          - youtube
+          - x
+          - reddit
+          - google_trends
+          example: youtube
+        displayName:
+          type: string
+          example: YouTube
+        picture:
+          type: string
+          format: uri
+          example: https://example.com/youtube.png
+        weight:
+          type: number
+          description: Source weight in index calculation
+          minimum: 0
+          maximum: 1
+          example: 0.5
+        frequency:
+          type: number
+          description: Update frequency in seconds
+          example: 3600
+        currValue:
+          type:
+          - number
+          - 'null'
+          description: Current source value
+          example: 50
+        hasHistory:
+          type: boolean
+          example: true
+        metadata:
+          type: object
+        metrics:
+          type: array
+          items:
+            $ref: '#/components/schemas/SourceMetric'
+        dayPercentChangeSigned:
+          type:
+          - number
+          - 'null'
+          example: 0.06
+        weekPercentChangeSigned:
+          type:
+          - number
+          - 'null'
+          example: 0.08
+        monthPercentChangeSigned:
+          type:
+          - number
+          - 'null'
+          example: 0.1
+        yearPercentChangeSigned:
+          type:
+          - number
+          - 'null'
+          example: 0.12
+        allTimePercentChangeSigned:
+          type:
+          - number
+          - 'null'
+          example: 0.32
+    SourceMetric:
+      type: object
+      required:
+      - shortName
+      - displayName
+      - weight
+      - type
+      - frequency
+      - hasHistory
+      properties:
+        shortName:
+          type: string
+          example: new_videos
+        displayName:
+          type: string
+          example: New videos
+        weight:
+          type: number
+          minimum: 0
+          maximum: 1
+          example: 0.7
+        type:
+          type: string
+          enum:
+          - raw
+          - difference
+          description: Type of metric. Difference requires computing a delta (e.g., change in followers)
+          example: raw
+        curr:
+          type: object
+          properties:
+            value:
+              type: number
+              description: Latest value before transformation
+              example: 100000
+            diff:
+              type: number
+              description: Latest delta before transformation (only applies for metrics of type `difference`)
+              example: 500
+        frequency:
+          type: number
+          description: Update frequency in seconds
+          example: 3600
+        hasHistory:
+          type: boolean
+          example: true
+        metadata:
+          type: object
+    IndexRecord:
+      type: object
+      required:
+      - name
+      - createdAt
+      - sources
+      - sourceConfigs
+      - interval
+      - ready
+      - live
+      properties:
+        name:
+          type: string
+          description: Index identifier
+          example: OPENAI-IDX
+        createdAt:
+          type: string
+          format: date-time
+          example: '2025-01-01T00:00:00.000Z'
+        lastUpdate:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: Last time the index was updated
+          example: '2026-02-25T12:00:00.000Z'
+        currentValue:
+          type:
+          - number
+          - 'null'
+          description: Current computed index value
+          example: 100.5
+        sources:
+          type: array
+          items:
+            type: string
+          description: List of source platform names
+          example:
+          - youtube
+          - x
+          - reddit
+        sourceConfigs:
+          type: array
+          items:
+            $ref: '#/components/schemas/SourceConfig'
+        interval:
+          type: number
+          description: Update interval in seconds
+          example: 3600
+        ready:
+          type: boolean
+          description: Whether sufficient metric data has been collected for the index to be listed
+          example: true
+        live:
+          type: boolean
+          description: Whether the index is actively updating
+          example: true
+  responses:
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: RATE_LIMIT_EXCEEDED
+              message: Rate limit exceeded. Try again in 5 seconds.
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: INVALID_PARAMETER
+              message: Request validation failed
+              details:
+                fields:
+                - field: ticker
+                  message: Required
+  parameters:
+    IndexNamePath:
+      name: name
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Index name
+      example: OPENAI-IDX
+  securitySchemes:
+    ForumAccessKey:
+      type: apiKey
+      in: header
+      name: FORUM-ACCESS-KEY
+      description: Your API key ID (e.g. `fk_a1b2c3d4e5f6...`)
+    ForumAccessTimestamp:
+      type: apiKey
+      in: header
+      name: FORUM-ACCESS-TIMESTAMP
+      description: Unix epoch in seconds (UTC), as a string
+    ForumAccessSign:
+      type: apiKey
+      in: header
+      name: FORUM-ACCESS-SIGN
+      description: 'Base64-encoded HMAC-SHA256 signature.
+
+
+        **Signature generation:**
+
+        ```
+
+        prehash = timestamp + method + requestPath + body
+
+        signature = Base64(HMAC-SHA256(secret, prehash))
+
+        ```
+
+        '

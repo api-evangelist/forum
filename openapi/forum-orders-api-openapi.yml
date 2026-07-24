@@ -1,0 +1,776 @@
+openapi: 3.1.0
+info:
+  title: Forum Account Orders API
+  version: '1.0'
+  description: 'The Forum API provides programmatic access to the Forum perpetual futures exchange.
+
+    Trade attention-based perpetual futures, access real-time market data, and manage your account.
+
+
+    ## Base URL
+
+
+    All endpoints are relative to `https://api.forum.market/v1`.
+
+
+    ## Authentication
+
+
+    Public endpoints (market data, exchange status) require no authentication.
+
+    Private endpoints (orders, positions, account) require HMAC-SHA256 signed requests.
+
+
+    See the [Authentication](/api-reference/authentication) guide for details.
+
+    '
+  contact:
+    name: Forum Support
+    email: contact@forum.market
+    url: https://forum.market
+  termsOfService: https://forum-legal.s3.us-east-2.amazonaws.com/terms-of-service.pdf
+servers:
+- url: https://api.forum.market/v1
+  description: Production
+security:
+- ForumAccessKey: []
+  ForumAccessTimestamp: []
+  ForumAccessSign: []
+tags:
+- name: Orders
+  description: Order placement, cancellation, and queries
+paths:
+  /orders:
+    post:
+      operationId: createOrder
+      summary: Place an order
+      description: Place a new order in a market. Requires `trade` permission.
+      tags:
+      - Orders
+      security:
+      - ForumAccessKey: []
+        ForumAccessTimestamp: []
+        ForumAccessSign: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+      responses:
+        '201':
+          description: Order placed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderRecord'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: Order rejected (insufficient margin, reduce-only violation, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: INSUFFICIENT_MARGIN
+                  message: Insufficient margin to place order
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    get:
+      operationId: listOrders
+      summary: List open orders
+      description: Returns open orders with optional filtering. Requires `read` permission.
+      tags:
+      - Orders
+      security:
+      - ForumAccessKey: []
+        ForumAccessTimestamp: []
+        ForumAccessSign: []
+      parameters:
+      - name: ticker
+        in: query
+        schema:
+          type: string
+        description: Filter by market ticker
+      - name: side
+        in: query
+        schema:
+          type: string
+          enum:
+          - buy
+          - sell
+        description: Filter by order side
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 500
+          default: 100
+      - name: cursor
+        in: query
+        schema:
+          type: string
+        description: Opaque pagination cursor from a previous response
+      responses:
+        '200':
+          description: Paginated list of orders
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOrders'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    delete:
+      operationId: cancelAllOrders
+      summary: Cancel all open orders
+      description: Cancel all open orders, optionally filtered by market ticker. Requires `trade` permission.
+      tags:
+      - Orders
+      security:
+      - ForumAccessKey: []
+        ForumAccessTimestamp: []
+        ForumAccessSign: []
+      parameters:
+      - name: ticker
+        in: query
+        schema:
+          type: string
+        description: Cancel only orders for this market
+      responses:
+        '200':
+          description: Cancellation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelAllResult'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /orders/{orderId}:
+    get:
+      operationId: getOrder
+      summary: Get order by ID
+      description: Returns an order by its exchange-assigned ID. Requires `read` permission.
+      tags:
+      - Orders
+      security:
+      - ForumAccessKey: []
+        ForumAccessTimestamp: []
+        ForumAccessSign: []
+      parameters:
+      - $ref: '#/components/parameters/OrderIdPath'
+      responses:
+        '200':
+          description: Order details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderRecord'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    delete:
+      operationId: cancelOrder
+      summary: Cancel order by ID
+      description: Cancel an open order by its exchange-assigned ID. Requires `trade` permission.
+      tags:
+      - Orders
+      security:
+      - ForumAccessKey: []
+        ForumAccessTimestamp: []
+        ForumAccessSign: []
+      parameters:
+      - $ref: '#/components/parameters/OrderIdPath'
+      responses:
+        '200':
+          description: Cancelled order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderRecord'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /orders/client/{clientOrderId}:
+    get:
+      operationId: getOrderByClientId
+      summary: Get order by client order ID
+      description: Returns an order by its client-provided ID. Requires `read` permission.
+      tags:
+      - Orders
+      security:
+      - ForumAccessKey: []
+        ForumAccessTimestamp: []
+        ForumAccessSign: []
+      parameters:
+      - $ref: '#/components/parameters/ClientOrderIdPath'
+      responses:
+        '200':
+          description: Order details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderRecord'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    delete:
+      operationId: cancelOrderByClientId
+      summary: Cancel order by client order ID
+      description: Cancel an open order by its client-provided ID. Requires `trade` permission.
+      tags:
+      - Orders
+      security:
+      - ForumAccessKey: []
+        ForumAccessTimestamp: []
+        ForumAccessSign: []
+      parameters:
+      - $ref: '#/components/parameters/ClientOrderIdPath'
+      responses:
+        '200':
+          description: Cancelled order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderRecord'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /orders/batch:
+    post:
+      operationId: batchCreateOrders
+      summary: Place multiple orders
+      description: Place up to 10 orders in a single request. Each order is processed independently. Requires `trade` permission.
+      tags:
+      - Orders
+      security:
+      - ForumAccessKey: []
+        ForumAccessTimestamp: []
+        ForumAccessSign: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchCreateRequest'
+      responses:
+        '201':
+          description: Batch creation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchCreateResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    delete:
+      operationId: batchCancelOrders
+      summary: Cancel multiple orders
+      description: Cancel up to 20 orders in a single request. Each cancellation is processed independently. Requires `trade` permission.
+      tags:
+      - Orders
+      security:
+      - ForumAccessKey: []
+        ForumAccessTimestamp: []
+        ForumAccessSign: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchCancelRequest'
+      responses:
+        '200':
+          description: Batch cancellation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchCancelResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+components:
+  responses:
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: INSUFFICIENT_PERMISSIONS
+              message: API key lacks required permission
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: NOT_FOUND
+              message: Resource not found
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: RATE_LIMIT_EXCEEDED
+              message: Rate limit exceeded. Try again in 5 seconds.
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: INVALID_PARAMETER
+              message: Request validation failed
+              details:
+                fields:
+                - field: ticker
+                  message: Required
+    Unauthorized:
+      description: Missing or invalid authentication
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: UNAUTHORIZED
+              message: Missing or invalid authentication
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: INTERNAL_ERROR
+              message: An unexpected error occurred
+  schemas:
+    BatchCancelRequest:
+      type: object
+      required:
+      - orderIds
+      properties:
+        orderIds:
+          type: array
+          description: Order IDs
+          minItems: 1
+          maxItems: 20
+          items:
+            type: integer
+          example:
+          - 123
+          - 456
+          - 789
+    ErrorResponse:
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          required:
+          - code
+          - message
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code
+              example: INVALID_PARAMETER
+            message:
+              type: string
+              description: Human-readable error message
+              example: Request validation failed
+            details:
+              type: object
+              description: Additional error details
+              example:
+                fields:
+                - field: ticker
+                  message: Required
+    CreateOrderRequest:
+      type: object
+      required:
+      - ticker
+      - side
+      - qty
+      - orderType
+      properties:
+        ticker:
+          type: string
+          description: Market ticker symbol
+          example: OPENAI
+        side:
+          type: string
+          enum:
+          - buy
+          - sell
+          example: buy
+        qty:
+          type: number
+          description: Order quantity (positive)
+          example: 10
+        price:
+          type: number
+          description: Limit price in cents. Required for limit orders, must not be set for market orders.
+          example: 10050
+        orderType:
+          type: string
+          enum:
+          - market
+          - limit
+          description: '- `market`: Execute immediately at best available price
+
+            - `limit`: Place at a specific price
+
+            '
+          example: limit
+        timeInForce:
+          type: string
+          enum:
+          - goodTillCancel
+          - fillOrKill
+          - fillAndKill
+          description: 'Time-in-force policy. Required for limit orders, must not be set for market orders.
+
+            - `goodTillCancel`: Rests on the book until filled or cancelled
+
+            - `fillOrKill`: Must fill entirely immediately or be cancelled
+
+            - `fillAndKill`: Fill as much as possible immediately, cancel remainder
+
+            '
+          example: goodTillCancel
+        clientOrderId:
+          type: string
+          description: Client-generated order ID for idempotency and tracking
+          example: my-order-001
+        postOnly:
+          type: boolean
+          default: false
+          description: Reject if the order would match immediately (maker-only). Only valid for limit orders with goodTillCancel time-in-force.
+          example: false
+        reduceOnly:
+          type: boolean
+          default: false
+          description: Order can only reduce an existing position
+          example: false
+        selfTradePreventionMode:
+          type: string
+          enum:
+          - cr
+          - ci
+          - cb
+          default: cr
+          description: 'Self-trade prevention mode:
+
+            - `cr`: Cancel resting order
+
+            - `ci`: Cancel incoming order
+
+            - `cb`: Cancel both orders
+
+            '
+          example: cr
+    CancelAllResult:
+      type: object
+      required:
+      - cancelled
+      - orders
+      properties:
+        cancelled:
+          type: integer
+          description: Number of orders cancelled
+          example: 3
+        orders:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderRecord'
+    PaginatedOrders:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderRecord'
+        nextCursor:
+          type:
+          - string
+          - 'null'
+          description: Cursor for the next page. Null if no more results.
+          example: abc123
+    BatchCreateRequest:
+      type: object
+      required:
+      - orders
+      properties:
+        orders:
+          type: array
+          minItems: 1
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/CreateOrderRequest'
+    BatchCancelResult:
+      type: object
+      required:
+      - cancellations
+      properties:
+        cancellations:
+          type: array
+          items:
+            type: object
+            required:
+            - orderId
+            - success
+            properties:
+              orderId:
+                type: integer
+                example: 123
+              success:
+                type: boolean
+                example: true
+              error:
+                type: string
+                description: Error message if cancellation failed
+    BatchCreateResult:
+      type: object
+      required:
+      - orders
+      properties:
+        orders:
+          type: array
+          items:
+            type: object
+            properties:
+              clientOrderId:
+                type: string
+                example: my-order-001
+              order:
+                $ref: '#/components/schemas/OrderRecord'
+              error:
+                type: string
+                description: Error message if this individual order failed
+                example: Insufficient margin
+    OrderRecord:
+      type: object
+      required:
+      - id
+      - createdAt
+      - clientOrderId
+      - userId
+      - lockedNotional
+      - postOnly
+      - reduceOnly
+      - selfTradePreventionMode
+      properties:
+        id:
+          type: integer
+          description: Unique order identifier. Used in path parameters for GET/DELETE `/orders/{orderId}` and in batch cancel requests.
+          example: 12345
+        createdAt:
+          type: string
+          format: date-time
+          example: '2026-02-25T12:00:00.000Z'
+        updatedAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          example: '2026-02-25T12:00:01.000Z'
+        clientOrderId:
+          type: string
+          description: Client-provided or server-generated order ID
+          example: my-order-001
+        userId:
+          type: integer
+          example: 42
+        ticker:
+          type:
+          - string
+          example: OPENAI
+        side:
+          type:
+          - string
+          enum:
+          - buy
+          - sell
+          example: buy
+        orderType:
+          type:
+          - string
+          enum:
+          - market
+          - limit
+          example: limit
+        timeInForce:
+          type:
+          - string
+          - 'null'
+          enum:
+          - goodTillCancel
+          - fillOrKill
+          - fillAndKill
+          - null
+          description: Time-in-force policy. Null for market orders.
+          example: goodTillCancel
+        price:
+          type:
+          - number
+          - 'null'
+          description: Limit price in cents. Null for market orders.
+          example: 10050
+        quantity:
+          type:
+          - number
+          description: Original order quantity
+          example: 10
+        remainingQuantity:
+          type:
+          - number
+          description: Unfilled quantity remaining unless status is `cancelled` or `rejected`
+          example: 10
+        status:
+          type:
+          - string
+          enum:
+          - resting
+          - partiallyFilled
+          - filled
+          - cancelled
+          - rejected
+          description: '- `resting`: On the order book, waiting to be filled
+
+            - `partiallyFilled`: Some quantity has been filled
+
+            - `filled`: Fully filled
+
+            - `cancelled`: Cancelled by user or system
+
+            - `rejected`: Rejected by matching engine
+
+            '
+          example: resting
+        engineOrderId:
+          type:
+          - integer
+          - 'null'
+          description: Internal matching engine order ID. Null while the order is awaiting engine acknowledgment.
+          example: 456
+        lockedNotional:
+          type: number
+          description: Cash initially held for this order in cents
+          example: 500
+        postOnly:
+          type: boolean
+          example: false
+        reduceOnly:
+          type: boolean
+          example: false
+        selfTradePreventionMode:
+          type: string
+          enum:
+          - cr
+          - ci
+          - cb
+          example: cr
+  parameters:
+    ClientOrderIdPath:
+      name: clientOrderId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Client-provided order ID
+      example: my-order-001
+    OrderIdPath:
+      name: orderId
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: Order ID
+      example: 12345
+  securitySchemes:
+    ForumAccessKey:
+      type: apiKey
+      in: header
+      name: FORUM-ACCESS-KEY
+      description: Your API key ID (e.g. `fk_a1b2c3d4e5f6...`)
+    ForumAccessTimestamp:
+      type: apiKey
+      in: header
+      name: FORUM-ACCESS-TIMESTAMP
+      description: Unix epoch in seconds (UTC), as a string
+    ForumAccessSign:
+      type: apiKey
+      in: header
+      name: FORUM-ACCESS-SIGN
+      description: 'Base64-encoded HMAC-SHA256 signature.
+
+
+        **Signature generation:**
+
+        ```
+
+        prehash = timestamp + method + requestPath + body
+
+        signature = Base64(HMAC-SHA256(secret, prehash))
+
+        ```
+
+        '

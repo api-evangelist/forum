@@ -1,0 +1,418 @@
+openapi: 3.1.0
+info:
+  title: Forum Account Markets API
+  version: '1.0'
+  description: 'The Forum API provides programmatic access to the Forum perpetual futures exchange.
+
+    Trade attention-based perpetual futures, access real-time market data, and manage your account.
+
+
+    ## Base URL
+
+
+    All endpoints are relative to `https://api.forum.market/v1`.
+
+
+    ## Authentication
+
+
+    Public endpoints (market data, exchange status) require no authentication.
+
+    Private endpoints (orders, positions, account) require HMAC-SHA256 signed requests.
+
+
+    See the [Authentication](/api-reference/authentication) guide for details.
+
+    '
+  contact:
+    name: Forum Support
+    email: contact@forum.market
+    url: https://forum.market
+  termsOfService: https://forum-legal.s3.us-east-2.amazonaws.com/terms-of-service.pdf
+servers:
+- url: https://api.forum.market/v1
+  description: Production
+security:
+- ForumAccessKey: []
+  ForumAccessTimestamp: []
+  ForumAccessSign: []
+tags:
+- name: Markets
+  description: Market listings and details
+paths:
+  /markets:
+    get:
+      operationId: listMarkets
+      summary: List all markets
+      description: Returns all available markets with their current ticker data. Pagination will be added as the number of markets grows.
+      tags:
+      - Markets
+      security: []
+      parameters:
+      - name: category
+        in: query
+        schema:
+          type: string
+        description: Filter by market category
+        example: tech
+      responses:
+        '200':
+          description: List of markets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Market'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /markets/{ticker}:
+    get:
+      operationId: getMarket
+      summary: Get market
+      description: Returns details for a specific market, including current prices and statistics.
+      tags:
+      - Markets
+      security: []
+      parameters:
+      - $ref: '#/components/parameters/TickerPath'
+      responses:
+        '200':
+          description: Market details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Market'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          required:
+          - code
+          - message
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code
+              example: INVALID_PARAMETER
+            message:
+              type: string
+              description: Human-readable error message
+              example: Request validation failed
+            details:
+              type: object
+              description: Additional error details
+              example:
+                fields:
+                - field: ticker
+                  message: Required
+    Market:
+      allOf:
+      - $ref: '#/components/schemas/TickerInfo'
+      - type: object
+        required:
+        - name
+        - createdAt
+        - category
+        - expiryDate
+        - picture
+        - live
+        - lastFunding
+        - initialOpenTime
+        - aboutDesc
+        properties:
+          name:
+            type: string
+            description: Market display name
+            example: OpenAI
+          createdAt:
+            type: string
+            format: date-time
+            example: '2025-01-01T00:00:00.000Z'
+          category:
+            type: string
+            description: Market category
+            example: tech
+          subCategory:
+            type:
+            - string
+            - 'null'
+            example: Artificial intelligence
+          expiryDate:
+            type: string
+            format: date-time
+            example: '2025-12-31T00:00:00.000Z'
+          picture:
+            type: string
+            format: uri
+            description: Market icon URL (not currently in use)
+            example: https://example.com/openai.png
+          live:
+            type: boolean
+            description: Whether the market is currently active for trading
+            example: true
+          lastFunding:
+            type: string
+            format: date-time
+            description: Last funding settlement time
+            example: '2026-02-25T08:00:00.000Z'
+          initialOpenTime:
+            type: string
+            format: date-time
+            description: When the market first opened for trading
+            example: '2025-01-15T00:00:00.000Z'
+          aboutDesc:
+            type: string
+            description: Description of the market
+            example: A perpetual futures contract tracking OpenAI's attention index.
+    TickerInfo:
+      type: object
+      required:
+      - ticker
+      - index
+      - openInterest
+      - volumePastDay
+      - cumFunding
+      - updatedAt
+      properties:
+        ticker:
+          type: string
+          example: OPENAI
+        index:
+          type: string
+          description: Underlying attention index name
+          example: OPENAI-IDX
+        movingFundingRate:
+          type:
+          - number
+          - 'null'
+          description: Estimated next funding rate based on the average premium index in the current funding window
+          example: 0.0001
+        lastSettledFundingRate:
+          type:
+          - number
+          - 'null'
+          description: Last settled funding rate
+          example: 0.0001
+        lastPrice:
+          type:
+          - number
+          - 'null'
+          description: Last trade price in cents
+          example: 10550
+        markPrice:
+          type:
+          - number
+          - 'null'
+          description: Fair-value mark price in cents used for unrealized PnL and liquidation checks
+          example: 10525
+        bestBid:
+          type:
+          - number
+          - 'null'
+          description: Best bid price in cents
+          example: 10500
+        bestAsk:
+          type:
+          - number
+          - 'null'
+          description: Best ask price in cents
+          example: 10600
+        openInterest:
+          type: number
+          description: Total open interest in contracts
+          example: 1234
+        highPastDay:
+          type:
+          - number
+          - 'null'
+          description: 24-hour high price in cents
+          example: 11000
+        lowPastDay:
+          type:
+          - number
+          - 'null'
+          description: 24-hour low price in cents
+          example: 10000
+        volumePastDay:
+          type: number
+          description: 24-hour trading volume in cents
+          example: 500000
+        changePercentPastDay:
+          type:
+          - number
+          - 'null'
+          description: 24-hour price change percentage
+          example: 2.5
+        changePastDay:
+          type:
+          - number
+          - 'null'
+          description: 24-hour price change in cents
+          example: 250
+        cumFunding:
+          type: number
+          description: Running cumulative sum of all settled funding rates for a market. A position's accrued funding is `qty * (cumFunding - position.lastCumFunding)`.
+          example: 0.0023
+        fundingAvgPastWeek:
+          type:
+          - number
+          - 'null'
+          description: Average funding rate over the past week
+          example: 0.0001
+        fundingHighPastWeek:
+          type:
+          - number
+          - 'null'
+          description: Highest funding rate over the past week
+          example: 0.0003
+        fundingLowPastWeek:
+          type:
+          - number
+          - 'null'
+          description: Lowest funding rate over the past week
+          example: -0.0001
+        lastIndexValue:
+          type:
+          - number
+          - 'null'
+          description: Latest attention index value
+          example: 100
+        changeIndexPercentPastDay:
+          type:
+          - number
+          - 'null'
+          description: 24-hour index change percentage
+          example: 0.06
+        changeIndexPastDay:
+          type:
+          - number
+          - 'null'
+          description: 24-hour index change
+          example: 1.5
+        changeIndexPercentPastWeek:
+          type:
+          - number
+          - 'null'
+          description: Past week index change percentage
+          example: 0.06
+        changeIndexPastWeek:
+          type:
+          - number
+          - 'null'
+          description: Past week index change
+          example: 3
+        changeIndexPercentPastMonth:
+          type:
+          - number
+          - 'null'
+          description: Past month index change percentage
+          example: 0.06
+        changeIndexPastMonth:
+          type:
+          - number
+          - 'null'
+          description: Past month index change
+          example: 10
+        changeIndexPercentPastYear:
+          type:
+          - number
+          - 'null'
+          description: Past year index change percentage
+          example: 0.06
+        changeIndexPastYear:
+          type:
+          - number
+          - 'null'
+          description: Past year index change
+          example: 10
+        changeIndexPercentAllTime:
+          type:
+          - number
+          - 'null'
+          description: All time index change percentage
+          example: 0.06
+        changeIndexAllTime:
+          type:
+          - number
+          - 'null'
+          description: All time index change
+          example: 50
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp (ISO 8601)
+          example: '2025-02-25T00:00:00.000Z'
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: NOT_FOUND
+              message: Resource not found
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: RATE_LIMIT_EXCEEDED
+              message: Rate limit exceeded. Try again in 5 seconds.
+  parameters:
+    TickerPath:
+      name: ticker
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Market ticker symbol
+      example: OPENAI
+  securitySchemes:
+    ForumAccessKey:
+      type: apiKey
+      in: header
+      name: FORUM-ACCESS-KEY
+      description: Your API key ID (e.g. `fk_a1b2c3d4e5f6...`)
+    ForumAccessTimestamp:
+      type: apiKey
+      in: header
+      name: FORUM-ACCESS-TIMESTAMP
+      description: Unix epoch in seconds (UTC), as a string
+    ForumAccessSign:
+      type: apiKey
+      in: header
+      name: FORUM-ACCESS-SIGN
+      description: 'Base64-encoded HMAC-SHA256 signature.
+
+
+        **Signature generation:**
+
+        ```
+
+        prehash = timestamp + method + requestPath + body
+
+        signature = Base64(HMAC-SHA256(secret, prehash))
+
+        ```
+
+        '

@@ -1,0 +1,207 @@
+openapi: 3.1.0
+info:
+  title: Forum Account Exchange API
+  version: '1.0'
+  description: 'The Forum API provides programmatic access to the Forum perpetual futures exchange.
+
+    Trade attention-based perpetual futures, access real-time market data, and manage your account.
+
+
+    ## Base URL
+
+
+    All endpoints are relative to `https://api.forum.market/v1`.
+
+
+    ## Authentication
+
+
+    Public endpoints (market data, exchange status) require no authentication.
+
+    Private endpoints (orders, positions, account) require HMAC-SHA256 signed requests.
+
+
+    See the [Authentication](/api-reference/authentication) guide for details.
+
+    '
+  contact:
+    name: Forum Support
+    email: contact@forum.market
+    url: https://forum.market
+  termsOfService: https://forum-legal.s3.us-east-2.amazonaws.com/terms-of-service.pdf
+servers:
+- url: https://api.forum.market/v1
+  description: Production
+security:
+- ForumAccessKey: []
+  ForumAccessTimestamp: []
+  ForumAccessSign: []
+tags:
+- name: Exchange
+  description: Exchange status and server time
+paths:
+  /time:
+    get:
+      operationId: getServerTime
+      summary: Get server time
+      description: Returns the current server time. Use this to measure clock skew for HMAC signature generation.
+      tags:
+      - Exchange
+      security: []
+      responses:
+        '200':
+          description: Server time
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerTime'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /exchange/status:
+    get:
+      operationId: getExchangeStatus
+      summary: Get exchange status
+      description: Returns the current exchange operational status and maintenance windows.
+      tags:
+      - Exchange
+      security: []
+      responses:
+        '200':
+          description: Exchange status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeStatus'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          required:
+          - code
+          - message
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code
+              example: INVALID_PARAMETER
+            message:
+              type: string
+              description: Human-readable error message
+              example: Request validation failed
+            details:
+              type: object
+              description: Additional error details
+              example:
+                fields:
+                - field: ticker
+                  message: Required
+    ExchangeStatus:
+      type: object
+      required:
+      - inMaintenance
+      properties:
+        inMaintenance:
+          type: boolean
+          description: Whether the exchange is currently in maintenance mode
+          example: false
+        currentWindow:
+          oneOf:
+          - $ref: '#/components/schemas/MaintenanceWindow'
+          - type: 'null'
+          description: Current maintenance window, if active
+        nextWindow:
+          oneOf:
+          - $ref: '#/components/schemas/MaintenanceWindow'
+          - type: 'null'
+          description: Next scheduled maintenance window
+    MaintenanceWindow:
+      type: object
+      required:
+      - declaredAt
+      - startTime
+      - endTime
+      properties:
+        declaredAt:
+          type: string
+          format: date-time
+          example: '2026-02-24T12:00:00.000Z'
+        startTime:
+          type: string
+          format: date-time
+          example: '2026-02-25T00:00:00.000Z'
+        endTime:
+          type: string
+          format: date-time
+          example: '2026-02-25T02:00:00.000Z'
+        reason:
+          type:
+          - string
+          - 'null'
+          example: Scheduled maintenance
+    ServerTime:
+      type: object
+      required:
+      - epoch
+      - iso
+      properties:
+        epoch:
+          type: integer
+          description: Unix timestamp in seconds
+          example: 1740441600
+        iso:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp
+          example: '2026-02-25T00:00:00.000Z'
+  responses:
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: RATE_LIMIT_EXCEEDED
+              message: Rate limit exceeded. Try again in 5 seconds.
+  securitySchemes:
+    ForumAccessKey:
+      type: apiKey
+      in: header
+      name: FORUM-ACCESS-KEY
+      description: Your API key ID (e.g. `fk_a1b2c3d4e5f6...`)
+    ForumAccessTimestamp:
+      type: apiKey
+      in: header
+      name: FORUM-ACCESS-TIMESTAMP
+      description: Unix epoch in seconds (UTC), as a string
+    ForumAccessSign:
+      type: apiKey
+      in: header
+      name: FORUM-ACCESS-SIGN
+      description: 'Base64-encoded HMAC-SHA256 signature.
+
+
+        **Signature generation:**
+
+        ```
+
+        prehash = timestamp + method + requestPath + body
+
+        signature = Base64(HMAC-SHA256(secret, prehash))
+
+        ```
+
+        '

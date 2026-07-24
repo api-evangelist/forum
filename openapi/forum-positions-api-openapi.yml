@@ -1,0 +1,270 @@
+openapi: 3.1.0
+info:
+  title: Forum Account Positions API
+  version: '1.0'
+  description: 'The Forum API provides programmatic access to the Forum perpetual futures exchange.
+
+    Trade attention-based perpetual futures, access real-time market data, and manage your account.
+
+
+    ## Base URL
+
+
+    All endpoints are relative to `https://api.forum.market/v1`.
+
+
+    ## Authentication
+
+
+    Public endpoints (market data, exchange status) require no authentication.
+
+    Private endpoints (orders, positions, account) require HMAC-SHA256 signed requests.
+
+
+    See the [Authentication](/api-reference/authentication) guide for details.
+
+    '
+  contact:
+    name: Forum Support
+    email: contact@forum.market
+    url: https://forum.market
+  termsOfService: https://forum-legal.s3.us-east-2.amazonaws.com/terms-of-service.pdf
+servers:
+- url: https://api.forum.market/v1
+  description: Production
+security:
+- ForumAccessKey: []
+  ForumAccessTimestamp: []
+  ForumAccessSign: []
+tags:
+- name: Positions
+  description: Open position data
+paths:
+  /positions:
+    get:
+      operationId: listPositions
+      summary: List all positions
+      description: Returns all open positions for the authenticated user. Requires `read` permission.
+      tags:
+      - Positions
+      security:
+      - ForumAccessKey: []
+        ForumAccessTimestamp: []
+        ForumAccessSign: []
+      responses:
+        '200':
+          description: Positions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PositionsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /positions/{ticker}:
+    get:
+      operationId: getPosition
+      summary: Get position by ticker
+      description: Returns the position for a specific market. Requires `read` permission.
+      tags:
+      - Positions
+      security:
+      - ForumAccessKey: []
+        ForumAccessTimestamp: []
+        ForumAccessSign: []
+      parameters:
+      - $ref: '#/components/parameters/TickerPath'
+      responses:
+        '200':
+          description: Position details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PositionRecord'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+components:
+  responses:
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: INSUFFICIENT_PERMISSIONS
+              message: API key lacks required permission
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: NOT_FOUND
+              message: Resource not found
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: RATE_LIMIT_EXCEEDED
+              message: Rate limit exceeded. Try again in 5 seconds.
+    Unauthorized:
+      description: Missing or invalid authentication
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: UNAUTHORIZED
+              message: Missing or invalid authentication
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          required:
+          - code
+          - message
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code
+              example: INVALID_PARAMETER
+            message:
+              type: string
+              description: Human-readable error message
+              example: Request validation failed
+            details:
+              type: object
+              description: Additional error details
+              example:
+                fields:
+                - field: ticker
+                  message: Required
+    PositionsResponse:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PositionRecord'
+    PositionRecord:
+      type: object
+      required:
+      - id
+      - createdAt
+      - userId
+      - ticker
+      - qty
+      - avgEntryPrice
+      - realizedTradePnl
+      - lastUpdated
+      - realizedFundingPnl
+      - realizedFundingPnlAtOpen
+      - lastCumFunding
+      properties:
+        id:
+          type: integer
+          example: 1
+        createdAt:
+          type: string
+          format: date-time
+          description: Position creation time (time of initial entry)
+          example: '2026-02-20T00:00:00.000Z'
+        userId:
+          type: integer
+          example: 42
+        ticker:
+          type: string
+          example: OPENAI
+        qty:
+          type: number
+          description: Position size. Positive for long, negative for short.
+          example: 5
+        avgEntryPrice:
+          type: number
+          description: Average entry price in cents
+          example: 10000
+        realizedTradePnl:
+          type: number
+          description: Realized PnL from trades in cents
+          example: 20000
+        lastUpdated:
+          type: string
+          format: date-time
+          example: '2026-02-25T12:00:00.000Z'
+        realizedFundingPnl:
+          type: number
+          description: Net realized PnL from funding settlements in cents
+          example: 5000
+        realizedFundingPnlAtOpen:
+          type: number
+          description: Snapshot of `realizedFundingPnl` captured when the current position lifecycle began (flat --> open or long <--> short flip). Funding realized since the position was opened is `realizedFundingPnl - realizedFundingPnlAtOpen`.
+          example: 3000
+        lastCumFunding:
+          type: number
+          description: Snapshot of the market's `cumFunding` at the time the position's quantity last changed. See `cumFunding` in the `GET /markets/{ticker}` response for how accrued funding is computed.
+          example: 0.0023
+  parameters:
+    TickerPath:
+      name: ticker
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Market ticker symbol
+      example: OPENAI
+  securitySchemes:
+    ForumAccessKey:
+      type: apiKey
+      in: header
+      name: FORUM-ACCESS-KEY
+      description: Your API key ID (e.g. `fk_a1b2c3d4e5f6...`)
+    ForumAccessTimestamp:
+      type: apiKey
+      in: header
+      name: FORUM-ACCESS-TIMESTAMP
+      description: Unix epoch in seconds (UTC), as a string
+    ForumAccessSign:
+      type: apiKey
+      in: header
+      name: FORUM-ACCESS-SIGN
+      description: 'Base64-encoded HMAC-SHA256 signature.
+
+
+        **Signature generation:**
+
+        ```
+
+        prehash = timestamp + method + requestPath + body
+
+        signature = Base64(HMAC-SHA256(secret, prehash))
+
+        ```
+
+        '
