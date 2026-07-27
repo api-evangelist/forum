@@ -1,0 +1,98 @@
+generated: '2026-07-20'
+method: searched
+source: https://docs.forum.market/api-reference/concepts/errors
+format: custom-envelope
+envelope:
+  shape: '{ "error": { "code": string, "message": string, "details"?: object } }'
+  code_field: error.code
+  message_field: error.message
+  validation_details: error.details.fields[]  # [{ field, message }] on 400 INVALID_PARAMETER
+  note: >-
+    Forum uses a custom JSON error envelope (NOT RFC 9457 problem+json). Use the
+    machine-readable error.code for programmatic handling.
+retry_guidance:
+  retry: [429 RATE_LIMIT_EXCEEDED (after Retry-After), 500 INTERNAL_ERROR (exponential backoff)]
+  do_not_retry: [400 (fix params), 401, 403 (check key/signature/permission), 404, 409 (resolve conflict)]
+errors:
+- http: 400
+  code: INVALID_PARAMETER
+  description: Request validation failed (see details.fields)
+- http: 400
+  code: INVALID_ORDER_TYPE
+  description: Unsupported order type
+- http: 400
+  code: INVALID_SIDE
+  description: Side must be buy or sell
+- http: 400
+  code: INVALID_QUANTITY
+  description: Invalid order quantity
+- http: 400
+  code: INVALID_PRICE
+  description: Invalid price value
+- http: 400
+  code: PRICE_BAND_VIOLATION
+  description: Limit price is too far from current market price
+- http: 400
+  code: DUPLICATE_CLIENT_ORDER_ID
+  description: Client order ID already in use (idempotency conflict)
+- http: 401
+  code: UNAUTHORIZED
+  description: Missing or invalid authentication
+- http: 401
+  code: INVALID_SIGNATURE
+  description: HMAC signature verification failed
+- http: 401
+  code: TIMESTAMP_EXPIRED
+  description: Timestamp outside 30-second window
+- http: 403
+  code: INSUFFICIENT_PERMISSIONS
+  description: API key lacks required permission (read vs trade)
+- http: 404
+  code: NOT_FOUND
+  description: Resource not found
+- http: 409
+  code: INSUFFICIENT_MARGIN
+  description: Insufficient margin for order
+- http: 409
+  code: REDUCE_ONLY_VIOLATION
+  description: Reduce-only order would increase position
+- http: 409
+  code: ACCOUNT_LIQUIDATING
+  description: Account is being liquidated
+- http: 409
+  code: ACCOUNT_REDUCE_ONLY
+  description: Account is in reduce-only mode
+- http: 409
+  code: NO_LIQUIDITY
+  description: No liquidity to fill order
+- http: 409
+  code: ORDER_NOT_CANCELLABLE
+  description: Order already filled or cancelled
+- http: 409
+  code: POST_ONLY_WOULD_CROSS
+  description: Post-only order would match immediately
+- http: 409
+  code: ENGINE_REJECTED
+  description: Matching engine rejected the order
+- http: 409
+  code: EXCHANGE_IN_MAINTENANCE
+  description: Exchange is in maintenance mode
+- http: 429
+  code: RATE_LIMIT_EXCEEDED
+  description: Rate limit exceeded (see details.retryAfter and Retry-After header)
+- http: 500
+  code: INTERNAL_ERROR
+  description: Unexpected server error
+websocket_errors:
+- code: UNKNOWN_COMMAND
+  meaning: Unrecognized command
+- code: AUTH_REQUIRED
+  meaning: Private channel requires authentication
+- code: RATE_LIMIT
+  meaning: Message rate limit exceeded (connection will be closed)
+- code: CONNECTION_LIMIT
+  meaning: IP connection limit exceeded (connection will be closed)
+- code: INVALID_SIGNATURE
+  meaning: HMAC signature verification failed (WebSocket auth)
+- code: MISSING_CREDENTIALS
+  meaning: No authentication credentials provided

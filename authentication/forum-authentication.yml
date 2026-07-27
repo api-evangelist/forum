@@ -1,0 +1,48 @@
+generated: '2026-07-20'
+method: searched
+source: openapi/forum-openapi-original.yml
+docs: https://docs.forum.market/api-reference/authentication
+model: hmac-signature
+model_notes: >-
+  Three apiKey headers combine into an HMAC-SHA256 request signature. FORUM-ACCESS-SIGN =
+  Base64(HMAC-SHA256(secret, timestamp + method + requestPath + body)). Timestamp
+  (FORUM-ACCESS-TIMESTAMP) must be within a 30-second window (else 401 TIMESTAMP_EXPIRED).
+  Keys are minted in app.forum.market with `read` or `trade` permission (key id `fk_...`,
+  secret `sk_...`, secret shown once). Public market-data endpoints need no auth.
+permissions:
+- read
+- trade
+summary:
+  types:
+  - apiKey
+  api_key_in:
+  - header
+schemes:
+- name: ForumAccessKey
+  type: apiKey
+  in: header
+  parameter: FORUM-ACCESS-KEY
+  description: Your API key ID (e.g. `fk_a1b2c3d4e5f6...`)
+  sources:
+  - openapi/forum-openapi-original.yml
+- name: ForumAccessTimestamp
+  type: apiKey
+  in: header
+  parameter: FORUM-ACCESS-TIMESTAMP
+  description: Unix epoch in seconds (UTC), as a string
+  sources:
+  - openapi/forum-openapi-original.yml
+- name: ForumAccessSign
+  type: apiKey
+  in: header
+  parameter: FORUM-ACCESS-SIGN
+  description: |-
+    Base64-encoded HMAC-SHA256 signature.
+
+    **Signature generation:**
+    ```
+    prehash = timestamp + method + requestPath + body
+    signature = Base64(HMAC-SHA256(secret, prehash))
+    ```
+  sources:
+  - openapi/forum-openapi-original.yml

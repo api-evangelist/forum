@@ -1,0 +1,28 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for Forum API
+  version: 1.0.0
+extends: openapi/forum-openapi-original.yml
+actions:
+- target: $.info
+  update:
+    x-apievangelist-enriched: '2026-07-20'
+    x-apievangelist-artifacts:
+      authentication: authentication/forum-authentication.yml
+      conventions: conventions/forum-conventions.yml
+      errors: errors/forum-error-codes.yml
+      rate-limits: rate-limits/forum-rate-limits.yml
+      lifecycle: lifecycle/forum-lifecycle.yml
+      changelog: changelog/forum-changelog.yml
+      data-model: data-model/forum-data-model.yml
+      conformance: conformance/forum-conformance.yml
+      agentic-access: agentic-access/forum-agentic-access.yml
+      asyncapi: asyncapi/forum-websocket-asyncapi.yml
+      skills: skills/forum.md
+      mcp: mcp/forum-mcp.yml
+    x-apievangelist-notes: >-
+      Forum is a perpetual-futures exchange on attention indices. Auth is
+      HMAC-SHA256 request signing; idempotency via clientOrderId; cursor
+      pagination; documented sliding-window rate limits; real-time WebSocket
+      feed (AsyncAPI 3.0.0). Provider ships an agent-native discovery surface
+      (llms.txt, agent-card, agent-skills, docs MCP).

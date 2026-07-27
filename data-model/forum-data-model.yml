@@ -1,0 +1,62 @@
+generated: '2026-07-20'
+method: derived
+source: openapi/forum-openapi-original.yml
+description: >-
+  Entity-relationship graph derived from the Forum OpenAPI schemas and the
+  ticker/clientOrderId reference fields that link them.
+entities:
+- name: Market
+  key: ticker
+  summary: A tradable perpetual-futures market on an attention index (e.g. OPENAI).
+- name: Index
+  key: ticker
+  summary: The attention index underlying a market; value derived from social/search/streaming source metrics.
+- name: Order
+  key: orderId
+  alt_key: clientOrderId
+  summary: A limit or market order in a market, with side/qty/price/timeInForce.
+- name: Fill
+  key: fillId
+  summary: A trade execution against an order.
+- name: Position
+  key: ticker
+  summary: The authenticated user's open position in a market.
+- name: Account
+  summary: Balances, margin, PnL and account-health for the authenticated user.
+- name: FundingRate
+  summary: Current and historical funding rate for a market.
+relationships:
+- from: Order
+  to: Market
+  type: belongs_to
+  via: ticker
+- from: Order
+  to: Fill
+  type: has_many
+  via: orderId
+- from: Fill
+  to: Market
+  type: belongs_to
+  via: ticker
+- from: Position
+  to: Market
+  type: belongs_to
+  via: ticker
+- from: Market
+  to: Index
+  type: has_one
+  via: ticker
+- from: FundingRate
+  to: Market
+  type: belongs_to
+  via: ticker
+- from: Account
+  to: Position
+  type: has_many
+- from: Index
+  to: SourceMetric
+  type: has_many
+id_conventions:
+  api_key_id_prefix: fk_
+  api_secret_prefix: sk_
+  order_reference: clientOrderId (client-supplied) or orderId (exchange-assigned)

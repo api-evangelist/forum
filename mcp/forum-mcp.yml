@@ -1,0 +1,32 @@
+generated: '2026-07-20'
+method: searched
+status: published
+source: https://docs.forum.market/.well-known/mcp/server-card.json
+server:
+  name: Forum Docs Docs MCP
+  description: Search and retrieve Forum documentation (docs knowledge base + OpenAPI specs).
+  version: 1.0.0
+  transport: http
+  url: https://forum-f20ab882.main-kill-isr.mintlify.me/mcp
+  authentication: none
+  capabilities:
+    tools: true
+    resources: true
+tools:
+- name: search_forum_docs
+  description: >-
+    Search across the Forum knowledge base for documentation, code examples, API
+    references, and guides. Returns contextual content with titles and direct
+    links to documentation pages.
+  read_only: true
+- name: query_docs_filesystem_forum_docs
+  description: >-
+    Run read-only shell-like queries (rg/grep/find/tree/ls/cat/head/jq, no
+    writes/network) against a virtualized in-memory filesystem containing the
+    Forum documentation pages and OpenAPI specs.
+  read_only: true
+notes: >-
+  This is Forum's Mintlify-hosted documentation MCP server (docs search/retrieval
+  only). It is NOT a trading MCP: it does not place orders or read account data.
+  A trading-tools MCP could be DERIVED from openapi/forum-openapi-original.yml
+  (24 operations) as a candidate follow-up.

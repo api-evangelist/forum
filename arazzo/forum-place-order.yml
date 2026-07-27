@@ -1,0 +1,78 @@
+arazzo: 1.0.1
+info:
+  title: Forum — discover a market and place an order
+  version: 1.0.0
+  description: >-
+    Check exchange status, list available attention-index markets, inspect one
+    market, place a limit order (idempotent via clientOrderId), confirm the
+    order, then read the resulting account and position. Public steps need no
+    auth; order/account steps require a `trade`/`read` API key (HMAC-SHA256).
+sourceDescriptions:
+- name: forumApi
+  url: ../openapi/forum-openapi-original.yml
+  type: openapi
+workflows:
+- workflowId: discoverAndPlaceOrder
+  summary: Discover a market and place a limit order, then confirm position.
+  inputs:
+    type: object
+    properties:
+      ticker:
+        type: string
+      qty:
+        type: number
+      price:
+        type: number
+      clientOrderId:
+        type: string
+  steps:
+  - stepId: exchangeStatus
+    operationId: getExchangeStatus
+    successCriteria:
+    - condition: $statusCode == 200
+  - stepId: listMarkets
+    operationId: listMarkets
+    successCriteria:
+    - condition: $statusCode == 200
+  - stepId: getMarket
+    operationId: getMarket
+    parameters:
+    - name: ticker
+      in: path
+      value: $inputs.ticker
+    successCriteria:
+    - condition: $statusCode == 200
+  - stepId: placeOrder
+    operationId: createOrder
+    requestBody:
+      contentType: application/json
+      payload:
+        ticker: $inputs.ticker
+        side: buy
+        qty: $inputs.qty
+        price: $inputs.price
+        orderType: limit
+        timeInForce: goodTillCancel
+        clientOrderId: $inputs.clientOrderId
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      orderId: $response.body#/orderId
+  - stepId: confirmOrder
+    operationId: getOrderByClientId
+    parameters:
+    - name: clientOrderId
+      in: path
+      value: $inputs.clientOrderId
+    successCriteria:
+    - condition: $statusCode == 200
+  - stepId: readPositions
+    operationId: listPositions
+    successCriteria:
+    - condition: $statusCode == 200
+  - stepId: readAccount
+    operationId: getAccount
+    successCriteria:
+    - condition: $statusCode == 200
+  outputs:
+    orderId: $steps.placeOrder.outputs.orderId

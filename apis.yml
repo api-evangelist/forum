@@ -1,22 +1,225 @@
 aid: forum
 name: Forum
-description: Forum is a company surfaced as a portfolio company of y-combinator and added to the API Evangelist
-  network as a stub for enrichment. This profile is a lead awaiting the enrichment pipeline.
+description: >-
+  Forum is a centralized exchange offering exposure to engagement-backed assets —
+  "the first exchange to trade on attention." It turns online attention across
+  social, search, and streaming data into measurable, tradable attention indices,
+  then lists continuous perpetual-style futures contracts on top of them so
+  participants can go long or short on cultural relevance as a new asset class.
+  Forum (Y Combinator W26, based in New York City) exposes a full public developer
+  surface: an OpenAPI 3.1 REST API at api.forum.market/v1 for market data, order
+  management, positions, and account queries, and an AsyncAPI 3.0 WebSocket feed at
+  wss://api.forum.market/ws/v1 for real-time order book, ticker, trade, index, and
+  funding updates. Authentication is HMAC-SHA256 request signing with read/trade
+  API-key permissions, and the docs ship an agent-native discovery surface
+  (llms.txt, agent-card, agent-skills, and a documentation MCP server).
+accessModel:
+  pricing: unknown
+  onboarding: self-serve
+  trial: false
+  try_now: false
+  public: false
+  label: Self-serve signup
+  confidence: medium
+  source:
+  - authentication
+  generated: '2026-07-22'
+  method: derived
+image: https://mintcdn.com/forum-f20ab882/NO88uiJ9um9e-WSg/images/dark.png
 url: https://raw.githubusercontent.com/api-evangelist/forum/refs/heads/main/apis.yml
 x-type: company
 x-source: vc-portfolio
 x-backed-by:
 - y-combinator
-x-tier: stub
+x-tier: enriched
 x-tier-reason: portfolio-lead
 specificationVersion: '0.20'
 created: '2026-07-17'
-modified: '2026-07-17'
+modified: '2026-07-20'
 tags:
 - Company
-apis: []
+- Trading
+- Exchange
+- Perpetual Futures
+- Market Data
+- Attention Economy
+- Fintech
+- WebSocket
+- Real Time
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
+apis:
+- aid: forum:forum-account-api
+  name: Forum Account API
+  description: Account summary and balance
+  humanURL: https://docs.forum.market/api-reference/introduction
+  baseURL: https://api.forum.market/v1
+  tags:
+  - Account
+  properties:
+  - type: OpenAPI
+    url: openapi/forum-account-api-openapi.yml
+  - type: AsyncAPI
+    url: asyncapi/forum-websocket-asyncapi.yml
+- aid: forum:forum-exchange-api
+  name: Forum Exchange API
+  description: Exchange status and server time
+  humanURL: https://docs.forum.market/api-reference/introduction
+  baseURL: https://api.forum.market/v1
+  tags:
+  - Exchange
+  properties:
+  - type: OpenAPI
+    url: openapi/forum-exchange-api-openapi.yml
+  - type: AsyncAPI
+    url: asyncapi/forum-websocket-asyncapi.yml
+- aid: forum:forum-fills-api
+  name: Forum Fills API
+  description: Trade execution history
+  humanURL: https://docs.forum.market/api-reference/introduction
+  baseURL: https://api.forum.market/v1
+  tags:
+  - Fills
+  properties:
+  - type: OpenAPI
+    url: openapi/forum-fills-api-openapi.yml
+  - type: AsyncAPI
+    url: asyncapi/forum-websocket-asyncapi.yml
+- aid: forum:forum-funding-api
+  name: Forum Funding API
+  description: Funding rates and history
+  humanURL: https://docs.forum.market/api-reference/introduction
+  baseURL: https://api.forum.market/v1
+  tags:
+  - Funding
+  properties:
+  - type: OpenAPI
+    url: openapi/forum-funding-api-openapi.yml
+  - type: AsyncAPI
+    url: asyncapi/forum-websocket-asyncapi.yml
+- aid: forum:forum-indices-api
+  name: Forum Indices API
+  description: Attention index values and history
+  humanURL: https://docs.forum.market/api-reference/introduction
+  baseURL: https://api.forum.market/v1
+  tags:
+  - Indices
+  properties:
+  - type: OpenAPI
+    url: openapi/forum-indices-api-openapi.yml
+  - type: AsyncAPI
+    url: asyncapi/forum-websocket-asyncapi.yml
+- aid: forum:forum-market-data-api
+  name: Forum Market Data API
+  description: Order books, tickers, trades, and candles
+  humanURL: https://docs.forum.market/api-reference/introduction
+  baseURL: https://api.forum.market/v1
+  tags:
+  - Market Data
+  properties:
+  - type: OpenAPI
+    url: openapi/forum-market-data-api-openapi.yml
+  - type: AsyncAPI
+    url: asyncapi/forum-websocket-asyncapi.yml
+- aid: forum:forum-markets-api
+  name: Forum Markets API
+  description: Market listings and details
+  humanURL: https://docs.forum.market/api-reference/introduction
+  baseURL: https://api.forum.market/v1
+  tags:
+  - Markets
+  properties:
+  - type: OpenAPI
+    url: openapi/forum-markets-api-openapi.yml
+  - type: AsyncAPI
+    url: asyncapi/forum-websocket-asyncapi.yml
+- aid: forum:forum-orders-api
+  name: Forum Orders API
+  description: Order placement, cancellation, and queries
+  humanURL: https://docs.forum.market/api-reference/introduction
+  baseURL: https://api.forum.market/v1
+  tags:
+  - Orders
+  properties:
+  - type: OpenAPI
+    url: openapi/forum-orders-api-openapi.yml
+  - type: AsyncAPI
+    url: asyncapi/forum-websocket-asyncapi.yml
+- aid: forum:forum-positions-api
+  name: Forum Positions API
+  description: Open position data
+  humanURL: https://docs.forum.market/api-reference/introduction
+  baseURL: https://api.forum.market/v1
+  tags:
+  - Positions
+  properties:
+  - type: OpenAPI
+    url: openapi/forum-positions-api-openapi.yml
+  - type: AsyncAPI
+    url: asyncapi/forum-websocket-asyncapi.yml
+common:
+- type: DeveloperPortal
+  url: https://docs.forum.market/
+- type: Documentation
+  url: https://docs.forum.market/
+- type: APIReference
+  url: https://docs.forum.market/api-reference/introduction
+- type: GettingStarted
+  url: https://docs.forum.market/api-reference/quick-start
+- type: Quickstart
+  url: https://docs.forum.market/api-reference/quick-start
+- type: SignUp
+  url: https://app.forum.market/
+- type: TermsOfService
+  url: https://forum-legal.s3.us-east-2.amazonaws.com/terms-of-service.pdf
+- type: Support
+  url: https://docs.forum.market/guide/feedback
+- type: ChangeLog
+  url: changelog/forum-changelog.yml
+- type: OpenAPI
+  url: openapi/forum-openapi-original.yml
+- type: AsyncAPI
+  url: asyncapi/forum-websocket-asyncapi.yml
+- type: Webhooks
+  url: asyncapi/forum-websocket-asyncapi.yml
+- type: Authentication
+  url: authentication/forum-authentication.yml
+- type: Conventions
+  url: conventions/forum-conventions.yml
+- type: Idempotency
+  url: conventions/forum-conventions.yml
+- type: RateLimits
+  url: rate-limits/forum-rate-limits.yml
+- type: ErrorCatalog
+  url: errors/forum-error-codes.yml
+- type: Lifecycle
+  url: lifecycle/forum-lifecycle.yml
+- type: DataModel
+  url: data-model/forum-data-model.yml
+- type: Conformance
+  url: conformance/forum-conformance.yml
+- type: AgenticAccess
+  url: agentic-access/forum-agentic-access.yml
+- type: DomainSecurity
+  url: security/forum-domain-security.yml
+- type: WellKnown
+  url: well-known/forum-well-known.yml
+- type: MCPServer
+  url: mcp/forum-mcp.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: LLMsTxt
+  url: llms/forum-llms.txt
+- type: Overlay
+  url: overlays/forum-openapi-overlay.yaml
+- type: Arazzo
+  name: Discover a market and place an order
+  url: arazzo/forum-place-order.yml
+x-enrichment:
+  date: '2026-07-20'
+  status: enriched
+  artifacts_added: 20
+  pass: local-v1

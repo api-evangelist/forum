@@ -1,0 +1,46 @@
+generated: '2026-07-20'
+method: searched
+source: https://docs.forum.market/api-reference/concepts/rate-limits
+algorithm: sliding-window
+window_note: applies to requests within the last 60 seconds, not fixed calendar windows
+headers:
+  limit: X-RateLimit-Limit
+  remaining: X-RateLimit-Remaining
+  reset: X-RateLimit-Reset
+  retry_after: Retry-After
+exceeded_status: 429
+exceeded_code: RATE_LIMIT_EXCEEDED
+tiers:
+- category: Global backstop
+  limit_count: 600
+  unit: req/min
+  window_seconds: 60
+  scope: per-ip
+  applies_to: All endpoints
+- category: Public endpoints
+  limit_count: 120
+  unit: req/min
+  window_seconds: 60
+  scope: per-ip
+  applies_to: Market data, exchange status, indices
+- category: Private read
+  limit_count: 300
+  unit: req/min
+  window_seconds: 60
+  scope: per-user
+  applies_to: Account, positions, fills, orders (GET)
+- category: Order operations
+  limit_count: 500
+  unit: ops/min
+  window_seconds: 60
+  scope: per-user
+  applies_to: Order create, cancel, batch operations
+- category: WebSocket inbound
+  limit_count: 10
+  unit: msg/sec
+  window_seconds: 1
+  scope: per-connection
+  applies_to: All WebSocket messages
+notes: >-
+  Per-user limits key on user identity, not IP — creating multiple API keys does
+  not increase capacity.

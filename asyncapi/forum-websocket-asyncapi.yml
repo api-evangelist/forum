@@ -1,0 +1,2003 @@
+asyncapi: 3.0.0
+info:
+  title: Forum WebSocket Feed
+  version: '1.0'
+  description: >
+    Real-time market data and private account updates via WebSocket.
+
+
+    ## Connection
+
+
+    Connect to `wss://api.forum.market/ws/v1` to establish a WebSocket
+    connection.
+
+
+    You must send a `subscribe` command within **10 seconds** of connecting or
+    the connection will be closed.
+
+
+    ## Connection Limits
+
+
+    - **32 connections per IP address**
+
+    - **10 inbound messages per second** per connection (exceeding this
+    disconnects the client)
+
+
+    ## Ping/Pong
+
+
+    The server sends a WebSocket ping every **30 seconds**. You must respond
+    with a pong within 10 seconds or the connection is terminated.
+
+
+    ## Subscription Management
+
+
+    Subscriptions are **additive** — sending a new subscribe command does not
+    replace existing subscriptions.
+
+    Use the `unsubscribe` command to remove subscriptions.
+
+
+    ### Subscribe
+
+
+    ```json
+
+    {
+      "id": 1,
+      "cmd": "subscribe",
+      "params": {
+        "channels": ["bookUpdates", "tickerUpdates"],
+        "tickers": ["OPENAI"]
+      }
+    }
+
+    ```
+
+
+    ### Unsubscribe
+
+
+    ```json
+
+    {
+      "id": 2,
+      "cmd": "unsubscribe",
+      "params": {
+        "channels": ["tickerUpdates"],
+        "tickers": ["OPENAI"]
+      }
+    }
+
+    ```
+
+
+    ### List Subscriptions
+
+
+    ```json
+
+    { "id": 3, "cmd": "listSubscriptions" }
+
+    ```
+
+
+    ## Authentication
+
+
+    Private channels (`userOrders`, `userFills`, `userPositions`, `userAccount`)
+    require authentication.
+
+
+    ### In-Band HMAC Auth (recommended)
+
+
+    ```json
+
+    {
+      "id": 1,
+      "cmd": "auth",
+      "params": {
+        "key": "<api_key_id>",
+        "timestamp": "<unix_seconds>",
+        "signature": "<hmac_signature>"
+      }
+    }
+
+    ```
+
+
+    The signature signs the string: `timestamp + "GET" + "/ws/v1"`.
+
+
+    ### URL-Based Auth
+
+
+    ```
+
+    wss://api.forum.market/ws/v1?key=<api_key_id>&timestamp=<ts>&signature=<sig>
+
+    ```
+
+
+    ### Auth Response
+
+
+    Success: `{ "event": "authOk" }`
+
+    Failure: `{ "type": "error", "error": { "code": "INVALID_SIGNATURE",
+    "message": "..." } }`
+servers:
+  production:
+    host: api.forum.market/ws/v1
+    protocol: wss
+    description: Production WebSocket server
+channels:
+  subscribe:
+    address: /
+    description: |
+      Subscribe to one or more channels for the specified tickers.
+      Subscriptions are additive — they do not replace existing subscriptions.
+    messages:
+      subscribeCommand:
+        $ref: '#/components/messages/SubscribeCommand'
+      subscribeResponse:
+        $ref: '#/components/messages/SubscribeResponse'
+  unsubscribe:
+    address: /
+    description: |
+      Unsubscribe from one or more channels for the specified tickers.
+    messages:
+      unsubscribeCommand:
+        $ref: '#/components/messages/UnsubscribeCommand'
+      unsubscribeResponse:
+        $ref: '#/components/messages/UnsubscribeResponse'
+  listSubscriptions:
+    address: /
+    description: |
+      List all current subscriptions on this connection.
+    messages:
+      listSubscriptionsCommand:
+        $ref: '#/components/messages/ListSubscriptionsCommand'
+      listSubscriptionsResponse:
+        $ref: '#/components/messages/ListSubscriptionsResponse'
+  auth:
+    address: /
+    description: |
+      Authenticate the connection for private channel access using HMAC-SHA256.
+      The signature signs: `timestamp + "GET" + "/ws/v1"`.
+    messages:
+      authCommand:
+        $ref: '#/components/messages/AuthCommand'
+      authOk:
+        $ref: '#/components/messages/AuthOk'
+      authError:
+        $ref: '#/components/messages/AuthError'
+  logout:
+    address: /
+    description: >
+      Log out the authenticated user and remove all private channel
+      subscriptions.
+    messages:
+      logoutCommand:
+        $ref: '#/components/messages/LogoutCommand'
+      loggedOut:
+        $ref: '#/components/messages/LoggedOut'
+  errors:
+    address: /
+    description: >
+      General error responses sent when a command fails validation or cannot be
+      processed.
+    messages:
+      errorMessage:
+        $ref: '#/components/messages/ErrorMessage'
+  bookUpdates:
+    address: bookUpdates
+    description: >
+      Real-time order book updates. On subscribe, the server sends a full book
+      snapshot, then incremental updates.
+
+
+      **Sequence numbers:** Each message includes `data.seq` for gap detection.
+      Verify that `seq` increments by 1. If a gap is detected, re-subscribe to
+      get a fresh snapshot.
+
+
+      **Quantity model:** The `qty` field is the **absolute size** at a price
+      level. A `qty` of `0` means the level has been removed.
+    messages:
+      bookSnapshot:
+        $ref: '#/components/messages/BookSnapshot'
+      bookUpdate:
+        $ref: '#/components/messages/BookUpdate'
+  tickerUpdates:
+    address: tickerUpdates
+    description: >
+      Level 1 market data updates including last price, best bid/ask, volume,
+      funding rates, and index data.
+    messages:
+      tickerUpdate:
+        $ref: '#/components/messages/TickerUpdate'
+  trades:
+    address: trades
+    description: >
+      Real-time public trade feed. Each message represents a single executed
+      trade.
+    messages:
+      trade:
+        $ref: '#/components/messages/Trade'
+  indexUpdates:
+    address: indexUpdates
+    description: >
+      Live attention index value updates, including changes to underlying
+      metrics.
+    messages:
+      indexUpdate:
+        $ref: '#/components/messages/IndexUpdate'
+  fundingEvents:
+    address: fundingEvents
+    description: |
+      Funding events. Emitted daily when funding occurs.
+    messages:
+      fundingEvent:
+        $ref: '#/components/messages/FundingEvent'
+  candleUpdates1m:
+    address: candleUpdates1m
+    title: Candle updates 1m
+    description: >
+      Live 1-minute candlestick updates. The `active` field indicates whether
+      the candle is still open.
+    messages:
+      candleUpdate:
+        $ref: '#/components/messages/CandleUpdate'
+  candleUpdates5m:
+    address: candleUpdates5m
+    title: Candle updates 5m
+    description: >
+      Live 5-minute candlestick updates. The `active` field indicates whether
+      the candle is still open.
+    messages:
+      candleUpdate:
+        $ref: '#/components/messages/CandleUpdate'
+  candleUpdates1d:
+    address: candleUpdates1d
+    title: Candle updates 1d
+    description: >
+      Live 1-day candlestick updates. The `active` field indicates whether the
+      candle is still open.
+    messages:
+      candleUpdate:
+        $ref: '#/components/messages/CandleUpdate'
+  heartbeat:
+    address: heartbeat
+    description: >
+      Application-level heartbeat. Emitted every 1 second per subscribed ticker.
+
+      Useful for low-volume markets to confirm the connection and server are
+      alive.
+    messages:
+      heartbeat:
+        $ref: '#/components/messages/Heartbeat'
+  userOrders:
+    address: userOrders
+    description: >
+      Real-time order lifecycle updates for the authenticated user.
+
+      Streams all order state transitions (resting, partially filled, filled,
+      cancelled).
+
+
+      **Requires authentication.**
+    messages:
+      orderUpdate:
+        $ref: '#/components/messages/OrderUpdate'
+  userFills:
+    address: userFills
+    description: |
+      Real-time trade execution notifications for the authenticated user.
+
+      **Requires authentication.**
+    messages:
+      fill:
+        $ref: '#/components/messages/FillEvent'
+  userPositions:
+    address: userPositions
+    description: |
+      Real-time position updates for the authenticated user.
+      Includes `prevQty` to track position size changes.
+
+      **Requires authentication.**
+    messages:
+      positionUpdate:
+        $ref: '#/components/messages/PositionUpdate'
+  userAccount:
+    address: userAccount
+    description: |
+      Real-time account margin and PnL updates for the authenticated user.
+
+      **Requires authentication.**
+    messages:
+      accountUpdate:
+        $ref: '#/components/messages/AccountUpdate'
+operations:
+  sendSubscribe:
+    action: receive
+    channel:
+      $ref: '#/channels/subscribe'
+    summary: Subscribe to channels
+    messages:
+      - $ref: '#/channels/subscribe/messages/subscribeCommand'
+  sendUnsubscribe:
+    action: receive
+    channel:
+      $ref: '#/channels/unsubscribe'
+    summary: Unsubscribe from channels
+    messages:
+      - $ref: '#/channels/unsubscribe/messages/unsubscribeCommand'
+  sendListSubscriptions:
+    action: receive
+    channel:
+      $ref: '#/channels/listSubscriptions'
+    summary: List active subscriptions
+    messages:
+      - $ref: '#/channels/listSubscriptions/messages/listSubscriptionsCommand'
+  sendAuth:
+    action: receive
+    channel:
+      $ref: '#/channels/auth'
+    summary: Authenticate connection
+    messages:
+      - $ref: '#/channels/auth/messages/authCommand'
+  sendLogout:
+    action: receive
+    channel:
+      $ref: '#/channels/logout'
+    summary: Log out
+    messages:
+      - $ref: '#/channels/logout/messages/logoutCommand'
+  receiveSubscribeResponse:
+    action: send
+    channel:
+      $ref: '#/channels/subscribe'
+    summary: Subscription confirmation
+    messages:
+      - $ref: '#/channels/subscribe/messages/subscribeResponse'
+  receiveUnsubscribeResponse:
+    action: send
+    channel:
+      $ref: '#/channels/unsubscribe'
+    summary: Unsubscription confirmation
+    messages:
+      - $ref: '#/channels/unsubscribe/messages/unsubscribeResponse'
+  receiveListSubscriptionsResponse:
+    action: send
+    channel:
+      $ref: '#/channels/listSubscriptions'
+    summary: Current subscription list
+    messages:
+      - $ref: '#/channels/listSubscriptions/messages/listSubscriptionsResponse'
+  receiveAuthOk:
+    action: send
+    channel:
+      $ref: '#/channels/auth'
+    summary: Authentication successful
+    messages:
+      - $ref: '#/channels/auth/messages/authOk'
+  receiveAuthError:
+    action: send
+    channel:
+      $ref: '#/channels/auth'
+    summary: Authentication failed
+    messages:
+      - $ref: '#/channels/auth/messages/authError'
+  receiveLoggedOut:
+    action: send
+    channel:
+      $ref: '#/channels/logout'
+    summary: Logout confirmation
+    messages:
+      - $ref: '#/channels/logout/messages/loggedOut'
+  receiveError:
+    action: send
+    channel:
+      $ref: '#/channels/errors'
+    summary: Error response
+    messages:
+      - $ref: '#/channels/errors/messages/errorMessage'
+  receiveBookUpdates:
+    action: send
+    channel:
+      $ref: '#/channels/bookUpdates'
+    summary: Receive order book updates
+    messages:
+      - $ref: '#/channels/bookUpdates/messages/bookSnapshot'
+      - $ref: '#/channels/bookUpdates/messages/bookUpdate'
+  receiveTickerUpdates:
+    action: send
+    channel:
+      $ref: '#/channels/tickerUpdates'
+    summary: Receive ticker updates
+    messages:
+      - $ref: '#/channels/tickerUpdates/messages/tickerUpdate'
+  receiveTrades:
+    action: send
+    channel:
+      $ref: '#/channels/trades'
+    summary: Receive public trades
+    messages:
+      - $ref: '#/channels/trades/messages/trade'
+  receiveIndexUpdates:
+    action: send
+    channel:
+      $ref: '#/channels/indexUpdates'
+    summary: Receive index updates
+    messages:
+      - $ref: '#/channels/indexUpdates/messages/indexUpdate'
+  receiveFundingEvents:
+    action: send
+    channel:
+      $ref: '#/channels/fundingEvents'
+    summary: Receive funding events
+    messages:
+      - $ref: '#/channels/fundingEvents/messages/fundingEvent'
+  receiveCandleUpdates1m:
+    action: send
+    channel:
+      $ref: '#/channels/candleUpdates1m'
+    summary: Receive 1-minute candle updates
+    messages:
+      - $ref: '#/channels/candleUpdates1m/messages/candleUpdate'
+  receiveCandleUpdates5m:
+    action: send
+    channel:
+      $ref: '#/channels/candleUpdates5m'
+    summary: Receive 5-minute candle updates
+    messages:
+      - $ref: '#/channels/candleUpdates5m/messages/candleUpdate'
+  receiveCandleUpdates1d:
+    action: send
+    channel:
+      $ref: '#/channels/candleUpdates1d'
+    summary: Receive 1-day candle updates
+    messages:
+      - $ref: '#/channels/candleUpdates1d/messages/candleUpdate'
+  receiveHeartbeat:
+    action: send
+    channel:
+      $ref: '#/channels/heartbeat'
+    summary: Receive heartbeats
+    messages:
+      - $ref: '#/channels/heartbeat/messages/heartbeat'
+  receiveOrderUpdates:
+    action: send
+    channel:
+      $ref: '#/channels/userOrders'
+    summary: Receive order updates
+    messages:
+      - $ref: '#/channels/userOrders/messages/orderUpdate'
+  receiveFills:
+    action: send
+    channel:
+      $ref: '#/channels/userFills'
+    summary: Receive fill events
+    messages:
+      - $ref: '#/channels/userFills/messages/fill'
+  receivePositionUpdates:
+    action: send
+    channel:
+      $ref: '#/channels/userPositions'
+    summary: Receive position updates
+    messages:
+      - $ref: '#/channels/userPositions/messages/positionUpdate'
+  receiveAccountUpdates:
+    action: send
+    channel:
+      $ref: '#/channels/userAccount'
+    summary: Receive account updates
+    messages:
+      - $ref: '#/channels/userAccount/messages/accountUpdate'
+components:
+  messages:
+    SubscribeCommand:
+      name: Subscribe
+      summary: Subscribe to channels
+      payload:
+        type: object
+        required:
+          - cmd
+          - params
+        properties:
+          id:
+            type: integer
+            description: Client-generated request ID for response correlation
+            example: 1
+          cmd:
+            type: string
+            const: subscribe
+          params:
+            type: object
+            required:
+              - channels
+              - tickers
+            properties:
+              channels:
+                type: array
+                items:
+                  type: string
+                description: Channels to subscribe to
+                example:
+                  - bookUpdates
+                  - tickerUpdates
+              tickers:
+                type: array
+                items:
+                  type: string
+                description: Market tickers to subscribe to
+                example:
+                  - OPENAI
+      examples:
+        - payload:
+            id: 1
+            cmd: subscribe
+            params:
+              channels:
+                - bookUpdates
+                - tickerUpdates
+              tickers:
+                - OPENAI
+    UnsubscribeCommand:
+      name: Unsubscribe
+      summary: Unsubscribe from channels
+      payload:
+        type: object
+        required:
+          - cmd
+          - params
+        properties:
+          id:
+            type: integer
+            example: 2
+          cmd:
+            type: string
+            const: unsubscribe
+          params:
+            type: object
+            required:
+              - channels
+              - tickers
+            properties:
+              channels:
+                type: array
+                items:
+                  type: string
+                example:
+                  - tickerUpdates
+              tickers:
+                type: array
+                items:
+                  type: string
+                example:
+                  - OPENAI
+      examples:
+        - payload:
+            id: 2
+            cmd: unsubscribe
+            params:
+              channels:
+                - tickerUpdates
+              tickers:
+                - OPENAI
+    ListSubscriptionsCommand:
+      name: List subscriptions
+      summary: List active subscriptions
+      payload:
+        type: object
+        required:
+          - cmd
+        properties:
+          id:
+            type: integer
+            example: 3
+          cmd:
+            type: string
+            const: listSubscriptions
+      examples:
+        - payload:
+            id: 3
+            cmd: listSubscriptions
+    AuthCommand:
+      name: Auth
+      summary: Authenticate with HMAC signature
+      payload:
+        type: object
+        required:
+          - cmd
+          - params
+        properties:
+          id:
+            type: integer
+            example: 1
+          cmd:
+            type: string
+            const: auth
+          params:
+            type: object
+            required:
+              - key
+              - timestamp
+              - signature
+            properties:
+              key:
+                type: string
+                description: API key ID
+                example: fk_abc123def456
+              timestamp:
+                type: string
+                description: Unix timestamp in seconds
+                example: '1740441600'
+              signature:
+                type: string
+                description: >-
+                  Base64-encoded HMAC-SHA256 signature of `timestamp + "GET" +
+                  "/ws/v1"`
+                example: dGhpcyBpcyBhIHNhbXBsZSBzaWduYXR1cmU=
+      examples:
+        - payload:
+            id: 1
+            cmd: auth
+            params:
+              key: fk_abc123def456
+              timestamp: '1740441600'
+              signature: dGhpcyBpcyBhIHNhbXBsZSBzaWduYXR1cmU=
+    LogoutCommand:
+      name: Logout
+      summary: Log out and remove private subscriptions
+      payload:
+        type: object
+        required:
+          - cmd
+        properties:
+          id:
+            type: integer
+            example: 4
+          cmd:
+            type: string
+            const: logout
+      examples:
+        - payload:
+            id: 4
+            cmd: logout
+    SubscribeResponse:
+      name: Subscribed
+      summary: Subscription confirmation
+      payload:
+        type: object
+        required:
+          - type
+          - result
+        properties:
+          id:
+            type: integer
+            example: 1
+          type:
+            type: string
+            const: subscribed
+          result:
+            type: object
+            properties:
+              channels:
+                type: array
+                items:
+                  type: string
+                example:
+                  - bookUpdates
+                  - tickerUpdates
+              tickers:
+                type: array
+                items:
+                  type: string
+                example:
+                  - OPENAI
+      examples:
+        - payload:
+            id: 1
+            type: subscribed
+            result:
+              channels:
+                - bookUpdates
+                - tickerUpdates
+              tickers:
+                - OPENAI
+    UnsubscribeResponse:
+      name: Unsubscribed
+      summary: Unsubscription confirmation
+      payload:
+        type: object
+        required:
+          - type
+          - result
+        properties:
+          id:
+            type: integer
+            example: 2
+          type:
+            type: string
+            const: unsubscribed
+          result:
+            type: object
+            properties:
+              channels:
+                type: array
+                items:
+                  type: string
+                example:
+                  - tickerUpdates
+              tickers:
+                type: array
+                items:
+                  type: string
+                example:
+                  - OPENAI
+      examples:
+        - payload:
+            id: 2
+            type: unsubscribed
+            result:
+              channels:
+                - tickerUpdates
+              tickers:
+                - OPENAI
+    ListSubscriptionsResponse:
+      name: Subscriptions
+      summary: Current subscription list
+      payload:
+        type: object
+        required:
+          - type
+          - result
+        properties:
+          id:
+            type: integer
+            example: 3
+          type:
+            type: string
+            const: subscriptions
+          result:
+            type: object
+            properties:
+              subscriptions:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    channel:
+                      type: string
+                      example: bookUpdates
+                    tickers:
+                      type: array
+                      items:
+                        type: string
+                      example:
+                        - OPENAI
+      examples:
+        - payload:
+            id: 3
+            type: subscriptions
+            result:
+              subscriptions:
+                - channel: bookUpdates
+                  tickers:
+                    - OPENAI
+                - channel: tickerUpdates
+                  tickers:
+                    - OPENAI
+    AuthOk:
+      name: Auth OK
+      summary: Authentication successful
+      payload:
+        type: object
+        required:
+          - event
+        properties:
+          id:
+            type: integer
+            example: 1
+          event:
+            type: string
+            const: authOk
+      examples:
+        - payload:
+            id: 1
+            event: authOk
+    AuthError:
+      name: Auth error
+      summary: Authentication failed
+      payload:
+        type: object
+        required:
+          - type
+          - error
+        properties:
+          id:
+            type: integer
+            example: 1
+          type:
+            type: string
+            const: error
+          error:
+            type: object
+            required:
+              - code
+              - message
+            properties:
+              code:
+                type: string
+                description: Error code
+                enum:
+                  - INVALID_SIGNATURE
+                  - MISSING_CREDENTIALS
+                example: INVALID_SIGNATURE
+              message:
+                type: string
+                example: Signature verification failed
+      examples:
+        - payload:
+            id: 1
+            type: error
+            error:
+              code: INVALID_SIGNATURE
+              message: Signature verification failed
+    LoggedOut:
+      name: Logged out
+      summary: Successfully logged out
+      payload:
+        type: object
+        required:
+          - event
+        properties:
+          id:
+            type: integer
+            example: 4
+          event:
+            type: string
+            const: loggedOut
+      examples:
+        - payload:
+            id: 4
+            event: loggedOut
+    ErrorMessage:
+      name: Error
+      summary: Error response
+      payload:
+        type: object
+        required:
+          - type
+          - error
+        properties:
+          id:
+            type: integer
+          type:
+            type: string
+            const: error
+          error:
+            type: object
+            required:
+              - code
+              - message
+            properties:
+              code:
+                type: string
+                enum:
+                  - UNKNOWN_COMMAND
+                  - INVALID_CHANNEL
+                  - AUTH_REQUIRED
+                  - RATE_LIMIT
+                  - CONNECTION_LIMIT
+                example: AUTH_REQUIRED
+              message:
+                type: string
+                example: Authentication required for private channels
+      examples:
+        - payload:
+            id: 5
+            type: error
+            error:
+              code: AUTH_REQUIRED
+              message: Authentication required for private channels
+    BookSnapshot:
+      name: Book snapshot
+      summary: Full order book snapshot
+      description: >-
+        Sent once when subscribing to `bookUpdates`. Contains the complete order
+        book state.
+      payload:
+        type: object
+        required:
+          - type
+          - channel
+          - ticker
+          - data
+        properties:
+          type:
+            type: string
+            const: bookSnapshot
+          channel:
+            type: string
+            const: bookUpdates
+          ticker:
+            type: string
+            example: OPENAI
+          data:
+            type: object
+            required:
+              - seq
+              - bids
+              - asks
+              - updatedAt
+            properties:
+              seq:
+                type: integer
+                description: >-
+                  Sequence number. Verify incremental updates continue from this
+                  value.
+                example: 100
+              bids:
+                type: array
+                description: Bid levels sorted by descending price
+                items:
+                  $ref: '#/components/schemas/BookLevel'
+              asks:
+                type: array
+                description: Ask levels sorted by ascending price
+                items:
+                  $ref: '#/components/schemas/BookLevel'
+              updatedAt:
+                type: string
+                format: date-time
+                description: Last update timestamp (ISO 8601)
+                example: '2026-02-25T12:00:00.000Z'
+      examples:
+        - payload:
+            type: bookSnapshot
+            channel: bookUpdates
+            ticker: OPENAI
+            data:
+              seq: 100
+              bids:
+                - price: 10500
+                  qty: 10
+                - price: 10450
+                  qty: 25
+              asks:
+                - price: 10600
+                  qty: 8
+                - price: 10650
+                  qty: 15
+              updatedAt: '2026-02-25T12:00:00.000Z'
+    BookUpdate:
+      name: Book update
+      summary: Incremental order book update
+      description: >
+        Incremental update to a single price level. The `qty` is the **new
+        absolute size** at that level.
+
+        A `qty` of `0` means the level has been removed.
+      payload:
+        type: object
+        required:
+          - type
+          - channel
+          - ticker
+          - data
+        properties:
+          type:
+            type: string
+            const: bookUpdate
+          channel:
+            type: string
+            const: bookUpdates
+          ticker:
+            type: string
+            example: OPENAI
+          data:
+            type: object
+            required:
+              - seq
+              - side
+              - price
+              - qty
+              - timestamp
+            properties:
+              seq:
+                type: integer
+                description: >-
+                  Sequence number. Must increment by 1 from the previous
+                  message.
+                example: 101
+              side:
+                type: string
+                enum:
+                  - buy
+                  - sell
+                example: buy
+              price:
+                type: number
+                example: 10500
+              qty:
+                type: number
+                description: >-
+                  New absolute quantity at this price level. 0 means the level
+                  is removed.
+                example: 15
+              timestamp:
+                type: string
+                format: date-time
+                description: Update timestamp (ISO 8601)
+                example: '2026-02-25T12:00:00.100Z'
+      examples:
+        - payload:
+            type: bookUpdate
+            channel: bookUpdates
+            ticker: OPENAI
+            data:
+              seq: 101
+              side: buy
+              price: 10500
+              qty: 15
+              timestamp: '2026-02-25T12:00:00.100Z'
+    TickerUpdate:
+      name: Ticker update
+      summary: Level 1 market data update
+      payload:
+        type: object
+        required:
+          - type
+          - channel
+          - ticker
+          - data
+        properties:
+          type:
+            type: string
+            const: tickerUpdate
+          channel:
+            type: string
+            const: tickerUpdates
+          ticker:
+            type: string
+            example: OPENAI
+          data:
+            type: object
+            description: Ticker data
+            properties:
+              index:
+                type: string
+                example: OPENAI-IDX
+              movingFundingRate:
+                type:
+                  - number
+                  - 'null'
+                description: >-
+                  Estimated next funding rate based on the average premium index
+                  in the current funding window
+                example: 0.0001
+              lastSettledFundingRate:
+                type:
+                  - number
+                  - 'null'
+                example: 0.0001
+              lastPrice:
+                type:
+                  - number
+                  - 'null'
+                example: 10550
+              markPrice:
+                type:
+                  - number
+                  - 'null'
+                description: >-
+                  Fair-value mark price in cents used for unrealized PnL and
+                  liquidation checks
+                example: 10525
+              bestBid:
+                type:
+                  - number
+                  - 'null'
+                example: 10500
+              bestAsk:
+                type:
+                  - number
+                  - 'null'
+                example: 10600
+              openInterest:
+                type: number
+                example: 1234
+              highPastDay:
+                type:
+                  - number
+                  - 'null'
+                example: 11000
+              lowPastDay:
+                type:
+                  - number
+                  - 'null'
+                example: 10000
+              volumePastDay:
+                type: number
+                example: 500000
+              changePercentPastDay:
+                type:
+                  - number
+                  - 'null'
+                example: 2.5
+              changePastDay:
+                type:
+                  - number
+                  - 'null'
+                example: 250
+              cumFunding:
+                type: number
+                example: 0.0023
+              fundingAvgPastWeek:
+                type:
+                  - number
+                  - 'null'
+                example: 0.0001
+              fundingHighPastWeek:
+                type:
+                  - number
+                  - 'null'
+                example: 0.0003
+              fundingLowPastWeek:
+                type:
+                  - number
+                  - 'null'
+                example: -0.0001
+              lastIndexValue:
+                type:
+                  - number
+                  - 'null'
+                example: 100
+              changeIndexPercentPastDay:
+                type:
+                  - number
+                  - 'null'
+                example: 1.5
+              changeIndexPastDay:
+                type:
+                  - number
+                  - 'null'
+                example: 1.5
+              changeIndexPercentPastWeek:
+                type:
+                  - number
+                  - 'null'
+                example: 3
+              changeIndexPastWeek:
+                type:
+                  - number
+                  - 'null'
+                example: 3
+              changeIndexPercentPastMonth:
+                type:
+                  - number
+                  - 'null'
+                example: 10
+              changeIndexPastMonth:
+                type:
+                  - number
+                  - 'null'
+                example: 10
+              changeIndexPercentPastYear:
+                type:
+                  - number
+                  - 'null'
+                example: null
+              changeIndexPastYear:
+                type:
+                  - number
+                  - 'null'
+                example: null
+              changeIndexPercentAllTime:
+                type:
+                  - number
+                  - 'null'
+                example: 50
+              changeIndexAllTime:
+                type:
+                  - number
+                  - 'null'
+                example: 50
+              updatedAt:
+                type: string
+                format: date-time
+                example: '2025-02-25T00:00:00.000Z'
+      examples:
+        - payload:
+            type: tickerUpdate
+            channel: tickerUpdates
+            ticker: OPENAI
+            data:
+              index: OPENAI-IDX
+              movingFundingRate: 0.0001
+              lastSettledFundingRate: 0.0001
+              lastPrice: 10550
+              markPrice: 10525
+              bestBid: 10500
+              bestAsk: 10600
+              openInterest: 1234
+              highPastDay: 11000
+              lowPastDay: 10000
+              volumePastDay: 500000
+              changePercentPastDay: 2.5
+              changePastDay: 250
+              cumFunding: 0.0023
+              fundingAvgPastWeek: 0.0001
+              fundingHighPastWeek: 0.0003
+              fundingLowPastWeek: -0.0001
+              lastIndexValue: 100
+              changeIndexPercentPastDay: 1.5
+              changeIndexPastDay: 1.5
+              changeIndexPercentPastWeek: 3
+              changeIndexPastWeek: 3
+              changeIndexPercentPastMonth: 10
+              changeIndexPastMonth: 10
+              changeIndexPercentPastYear: null
+              changeIndexPastYear: null
+              changeIndexPercentAllTime: 50
+              changeIndexAllTime: 50
+              updatedAt: '2026-02-25T12:00:00.000Z'
+    Trade:
+      name: Trade
+      summary: Public trade
+      description: A single executed trade on the market.
+      payload:
+        type: object
+        required:
+          - type
+          - channel
+          - ticker
+          - data
+        properties:
+          type:
+            type: string
+            const: trade
+          channel:
+            type: string
+            const: trades
+          ticker:
+            type: string
+            example: OPENAI
+          data:
+            type: object
+            properties:
+              askPrice:
+                type: number
+                example: 10600
+              bidPrice:
+                type: number
+                example: 10500
+              quantity:
+                type: number
+                example: 5
+              takerSide:
+                type: string
+                enum:
+                  - buy
+                  - sell
+                example: buy
+              timestamp:
+                type: string
+                format: date-time
+                description: Execution timestamp (ISO 8601)
+                example: '2026-02-25T12:00:00.100Z'
+      examples:
+        - payload:
+            type: trade
+            channel: trades
+            ticker: OPENAI
+            data:
+              askPrice: 10600
+              bidPrice: 10500
+              quantity: 5
+              takerSide: buy
+              timestamp: '2026-02-25T12:00:00.100Z'
+    IndexUpdate:
+      name: Index update
+      summary: Live attention index update
+      description: Real-time index value change with source breakdown.
+      payload:
+        type: object
+        required:
+          - type
+          - channel
+          - ticker
+          - data
+        properties:
+          type:
+            type: string
+            const: indexUpdate
+          channel:
+            type: string
+            const: indexUpdates
+          ticker:
+            type: string
+            description: Market ticker (derived from index name by removing `-IDX` suffix)
+            example: OPENAI
+          data:
+            type: object
+            required:
+              - name
+              - value
+              - timestamp
+              - updatedSourceConfigs
+            properties:
+              name:
+                type: string
+                description: Full index name
+                example: OPENAI-IDX
+              value:
+                type: number
+                description: Current index value
+                example: 100.6
+              timestamp:
+                type: string
+                format: date-time
+                example: '2026-02-25T12:00:00.000Z'
+              updatedSourceConfigs:
+                type: array
+                description: >-
+                  Source configurations with current values. See `GET
+                  /indices/{name}` for the full schema.
+                items:
+                  type: object
+      examples:
+        - payload:
+            type: indexUpdate
+            channel: indexUpdates
+            ticker: OPENAI
+            data:
+              name: OPENAI-IDX
+              value: 100.6
+              timestamp: '2026-02-25T12:00:00.000Z'
+              updatedSourceConfigs:
+                - name: youtube
+                  displayName: YouTube
+                  picture: https://example.com/youtube.png
+                  weight: 0.5
+                  frequency: 3600
+                  currValue: 50
+                  hasHistory: true
+                  metrics:
+                    - shortName: new_videos
+                      displayName: New videos
+                      weight: 0.7
+                      type: raw
+                      curr:
+                        value: 100000
+                        diff: 500
+                      frequency: 3600
+                      hasHistory: true
+    FundingEvent:
+      name: Funding event
+      summary: Funding event
+      payload:
+        type: object
+        required:
+          - type
+          - channel
+          - ticker
+          - data
+        properties:
+          type:
+            type: string
+            const: fundingEvent
+          channel:
+            type: string
+            const: fundingEvents
+          ticker:
+            type: string
+            example: OPENAI
+          data:
+            type: object
+            required:
+              - fundingRate
+              - timestamp
+            properties:
+              fundingRate:
+                type: number
+                example: 0.0001
+              timestamp:
+                type: string
+                format: date-time
+                example: '2026-02-25T08:00:00.000Z'
+      examples:
+        - payload:
+            type: fundingEvent
+            channel: fundingEvents
+            ticker: OPENAI
+            data:
+              fundingRate: 0.0001
+              timestamp: '2026-02-25T08:00:00.000Z'
+    CandleUpdate:
+      name: Candle update
+      summary: Live candlestick update
+      payload:
+        type: object
+        required:
+          - type
+          - channel
+          - ticker
+          - data
+        properties:
+          type:
+            type: string
+            const: candleUpdate
+          channel:
+            type: string
+            description: >-
+              Channel name (e.g., `candleUpdates1m`, `candleUpdates5m`,
+              `candleUpdates1d`)
+            example: candleUpdates1m
+          ticker:
+            type: string
+            example: OPENAI
+          data:
+            type: object
+            required:
+              - interval
+              - open
+              - high
+              - low
+              - close
+              - volume
+            properties:
+              interval:
+                type: string
+                enum:
+                  - 1m
+                  - 5m
+                  - 1d
+                example: 1m
+              start:
+                type: string
+                format: date-time
+                description: Candle period start time
+                example: '2026-02-25T12:00:00.000Z'
+              open:
+                type: number
+                example: 10500
+              high:
+                type: number
+                example: 10600
+              low:
+                type: number
+                example: 10450
+              close:
+                type: number
+                example: 10550
+              volume:
+                type: number
+                example: 150
+              active:
+                type: boolean
+                description: Whether this candle is still open
+                example: true
+      examples:
+        - payload:
+            type: candleUpdate
+            channel: candleUpdates1m
+            ticker: OPENAI
+            data:
+              interval: 1m
+              start: '2026-02-25T12:00:00.000Z'
+              open: 10500
+              high: 10600
+              low: 10450
+              close: 10550
+              volume: 150
+              active: true
+    Heartbeat:
+      name: Heartbeat
+      summary: Application-level heartbeat
+      description: Sent every 1 second per subscribed ticker.
+      payload:
+        type: object
+        required:
+          - type
+          - channel
+          - ticker
+          - timestamp
+        properties:
+          type:
+            type: string
+            const: heartbeat
+          channel:
+            type: string
+            const: heartbeat
+          ticker:
+            type: string
+            example: OPENAI
+          timestamp:
+            type: string
+            format: date-time
+            example: '2026-02-25T12:00:00.000Z'
+      examples:
+        - payload:
+            type: heartbeat
+            channel: heartbeat
+            ticker: OPENAI
+            timestamp: '2026-02-25T12:00:00.000Z'
+    OrderUpdate:
+      name: Order update
+      summary: Order state change
+      description: Streams all order state transitions for the authenticated user.
+      payload:
+        type: object
+        required:
+          - type
+          - channel
+          - data
+        properties:
+          type:
+            type: string
+            const: orderUpdate
+          channel:
+            type: string
+            const: userOrders
+          data:
+            type: object
+            description: Full order record
+            properties:
+              id:
+                type: integer
+                example: 12345
+              createdAt:
+                type: string
+                format: date-time
+                example: '2026-02-25T12:00:00.000Z'
+              updatedAt:
+                type:
+                  - string
+                  - 'null'
+                format: date-time
+                example: '2026-02-25T12:00:01.000Z'
+              clientOrderId:
+                type: string
+                example: my-order-001
+              userId:
+                type: integer
+                example: 42
+              ticker:
+                type: string
+                example: OPENAI
+              side:
+                type: string
+                enum:
+                  - buy
+                  - sell
+                example: buy
+              orderType:
+                type: string
+                enum:
+                  - market
+                  - limit
+                example: limit
+              timeInForce:
+                type:
+                  - string
+                  - 'null'
+                enum:
+                  - goodTillCancel
+                  - fillOrKill
+                  - fillAndKill
+                  - null
+                description: Time-in-force policy. Null for market orders.
+                example: goodTillCancel
+              price:
+                type:
+                  - number
+                  - 'null'
+                example: 10050
+              quantity:
+                type: number
+                example: 10
+              remainingQuantity:
+                type: number
+                example: 5
+              status:
+                type: string
+                enum:
+                  - resting
+                  - partiallyFilled
+                  - filled
+                  - cancelled
+                  - rejected
+                example: partiallyFilled
+              engineOrderId:
+                type:
+                  - integer
+                  - 'null'
+                example: 456
+              lockedNotional:
+                type: number
+                example: 50250
+              postOnly:
+                type: boolean
+                example: false
+              reduceOnly:
+                type: boolean
+                example: false
+              selfTradePreventionMode:
+                type: string
+                enum:
+                  - cr
+                  - ci
+                  - cb
+                example: cr
+      examples:
+        - payload:
+            type: orderUpdate
+            channel: userOrders
+            data:
+              id: 12345
+              createdAt: '2026-02-25T12:00:00.000Z'
+              updatedAt: '2026-02-25T12:00:01.000Z'
+              clientOrderId: my-order-001
+              userId: 42
+              ticker: OPENAI
+              side: buy
+              orderType: limit
+              timeInForce: goodTillCancel
+              price: 10050
+              quantity: 10
+              remainingQuantity: 5
+              status: partiallyFilled
+              engineOrderId: 456
+              lockedNotional: 50250
+              postOnly: false
+              reduceOnly: false
+              selfTradePreventionMode: cr
+    FillEvent:
+      name: Fill
+      summary: Trade execution
+      payload:
+        type: object
+        required:
+          - type
+          - channel
+          - data
+        properties:
+          type:
+            type: string
+            const: fill
+          channel:
+            type: string
+            const: userFills
+          data:
+            type: object
+            required:
+              - userId
+              - tradeId
+              - orderId
+              - qty
+              - ticker
+              - isTaker
+              - side
+              - price
+              - executedAt
+            properties:
+              userId:
+                type: integer
+                example: 42
+              tradeId:
+                type: integer
+                example: 5678
+              orderId:
+                type: integer
+                example: 12345
+              qty:
+                type: number
+                example: 5
+              ticker:
+                type: string
+                example: OPENAI
+              isTaker:
+                type: boolean
+                example: true
+              side:
+                type: string
+                enum:
+                  - buy
+                  - sell
+                example: buy
+              price:
+                type: number
+                example: 10550
+              executedAt:
+                type: string
+                format: date-time
+                example: '2026-02-25T12:00:01.000Z'
+      examples:
+        - payload:
+            type: fill
+            channel: userFills
+            data:
+              userId: 42
+              tradeId: 5678
+              orderId: 12345
+              qty: 5
+              ticker: OPENAI
+              isTaker: true
+              side: buy
+              price: 10550
+              executedAt: '2026-02-25T12:00:01.000Z'
+    PositionUpdate:
+      name: Position update
+      summary: Position change
+      payload:
+        type: object
+        required:
+          - type
+          - channel
+          - data
+        properties:
+          type:
+            type: string
+            const: positionUpdate
+          channel:
+            type: string
+            const: userPositions
+          data:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 1
+              timestamp:
+                type: string
+                format: date-time
+                example: '2026-02-20T00:00:00.000Z'
+              userId:
+                type: integer
+                example: 42
+              ticker:
+                type: string
+                example: OPENAI
+              qty:
+                type: number
+                description: Current position size (positive for long, negative for short)
+                example: 15
+              prevQty:
+                type: number
+                description: Previous position size before this update
+                example: 10
+              avgEntryPrice:
+                type: number
+                example: 10025
+              realizedTradePnl:
+                type: number
+                example: 20000
+              lastUpdated:
+                type: string
+                format: date-time
+                example: '2026-02-25T12:00:01.000Z'
+              realizedFundingPnl:
+                type: number
+                example: 5000
+              lastCumFunding:
+                type: number
+                example: 0.0023
+      examples:
+        - payload:
+            type: positionUpdate
+            channel: userPositions
+            data:
+              id: 1
+              timestamp: '2026-02-20T00:00:00.000Z'
+              userId: 42
+              ticker: OPENAI
+              qty: 15
+              prevQty: 10
+              avgEntryPrice: 10025
+              realizedTradePnl: 20000
+              lastUpdated: '2026-02-25T12:00:01.000Z'
+              realizedFundingPnl: 5000
+              lastCumFunding: 0.0023
+    AccountUpdate:
+      name: Account update
+      summary: Account balance and margin update
+      payload:
+        type: object
+        required:
+          - type
+          - channel
+          - data
+        properties:
+          type:
+            type: string
+            const: accountUpdate
+          channel:
+            type: string
+            const: userAccount
+          data:
+            type: object
+            properties:
+              userId:
+                type: integer
+                example: 42
+              asset:
+                type: string
+                example: USD
+              locked:
+                type: number
+                example: 5000
+              accruedFunding:
+                type: number
+                example: 12
+              realizedFunding:
+                type: number
+                example: 50
+              equity:
+                type: number
+                example: 105000
+              unrealizedPnl:
+                type: number
+                example: 500
+              realizedPnl:
+                type: number
+                example: 200
+              initialMargin:
+                type: number
+                example: 5000
+              maintenanceMargin:
+                type: number
+                example: 2500
+              freeMargin:
+                type: number
+                example: 97500
+              marginRatio:
+                type: number
+                example: 0.024
+              status:
+                type: string
+                enum:
+                  - healthy
+                  - reduce_only
+                  - liquidating
+                example: healthy
+      examples:
+        - payload:
+            type: accountUpdate
+            channel: userAccount
+            data:
+              userId: 42
+              asset: USD
+              locked: 5000
+              accruedFunding: 12
+              realizedFunding: 50
+              equity: 105000
+              unrealizedPnl: 500
+              realizedPnl: 200
+              initialMargin: 5000
+              maintenanceMargin: 2500
+              freeMargin: 97500
+              marginRatio: 0.024
+              status: healthy
+  schemas:
+    BookLevel:
+      type: object
+      required:
+        - price
+        - qty
+      properties:
+        price:
+          type: number
+          example: 10500
+        qty:
+          type: number
+          example: 10
+    SourceConfig:
+      type: object
+      required:
+        - name
+        - displayName
+        - picture
+        - weight
+        - frequency
+        - hasHistory
+        - metrics
+      properties:
+        name:
+          type: string
+          enum:
+            - youtube
+            - x
+            - reddit
+            - google_trends
+          example: youtube
+        displayName:
+          type: string
+          example: YouTube
+        picture:
+          type: string
+          example: https://example.com/youtube.png
+        weight:
+          type: number
+          example: 0.5
+        frequency:
+          type: number
+          example: 3600
+        currValue:
+          type:
+            - number
+            - 'null'
+          example: 50
+        hasHistory:
+          type: boolean
+          example: true
+        metadata:
+          type: object
+        metrics:
+          type: array
+          items:
+            type: object
+            properties:
+              shortName:
+                type: string
+                example: subs
+              displayName:
+                type: string
+                example: Subscribers
+              weight:
+                type: number
+                example: 0.7
+              type:
+                type: string
+                enum:
+                  - raw
+                  - difference
+                example: raw
+              curr:
+                type: object
+                properties:
+                  value:
+                    type: number
+                    example: 100000
+                  diff:
+                    type: number
+                    example: 500
+              frequency:
+                type: number
+                example: 3600
+              hasHistory:
+                type: boolean
+                example: true
+        dayPercentChangeSigned:
+          type:
+            - number
+            - 'null'
+          example: 1.5
+        weekPercentChangeSigned:
+          type:
+            - number
+            - 'null'
+          example: 3
+        monthPercentChangeSigned:
+          type:
+            - number
+            - 'null'
+          example: 10
+        yearPercentChangeSigned:
+          type:
+            - number
+            - 'null'
+          example: null
+        allTimePercentChangeSigned:
+          type:
+            - number
+            - 'null'
+          example: 50

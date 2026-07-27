@@ -1,0 +1,2251 @@
+openapi: 3.1.0
+info:
+  title: Forum API
+  version: '1.0'
+  description: >
+    The Forum API provides programmatic access to the Forum perpetual futures
+    exchange.
+
+    Trade attention-based perpetual futures, access real-time market data, and
+    manage your account.
+
+
+    ## Base URL
+
+
+    All endpoints are relative to `https://api.forum.market/v1`.
+
+
+    ## Authentication
+
+
+    Public endpoints (market data, exchange status) require no authentication.
+
+    Private endpoints (orders, positions, account) require HMAC-SHA256 signed
+    requests.
+
+
+    See the [Authentication](/api-reference/authentication) guide for details.
+  contact:
+    name: Forum Support
+    email: contact@forum.market
+    url: https://forum.market
+  termsOfService: https://forum-legal.s3.us-east-2.amazonaws.com/terms-of-service.pdf
+servers:
+  - url: https://api.forum.market/v1
+    description: Production
+tags:
+  - name: Exchange
+    description: Exchange status and server time
+  - name: Markets
+    description: Market listings and details
+  - name: Market Data
+    description: Order books, tickers, trades, and candles
+  - name: Indices
+    description: Attention index values and history
+  - name: Funding
+    description: Funding rates and history
+  - name: Orders
+    description: Order placement, cancellation, and queries
+  - name: Fills
+    description: Trade execution history
+  - name: Positions
+    description: Open position data
+  - name: Account
+    description: Account summary and balance
+security:
+  - ForumAccessKey: []
+    ForumAccessTimestamp: []
+    ForumAccessSign: []
+components:
+  securitySchemes:
+    ForumAccessKey:
+      type: apiKey
+      in: header
+      name: FORUM-ACCESS-KEY
+      description: Your API key ID (e.g. `fk_a1b2c3d4e5f6...`)
+    ForumAccessTimestamp:
+      type: apiKey
+      in: header
+      name: FORUM-ACCESS-TIMESTAMP
+      description: Unix epoch in seconds (UTC), as a string
+    ForumAccessSign:
+      type: apiKey
+      in: header
+      name: FORUM-ACCESS-SIGN
+      description: |
+        Base64-encoded HMAC-SHA256 signature.
+
+        **Signature generation:**
+        ```
+        prehash = timestamp + method + requestPath + body
+        signature = Base64(HMAC-SHA256(secret, prehash))
+        ```
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code
+              example: INVALID_PARAMETER
+            message:
+              type: string
+              description: Human-readable error message
+              example: Request validation failed
+            details:
+              type: object
+              description: Additional error details
+              example:
+                fields:
+                  - field: ticker
+                    message: Required
+    ServerTime:
+      type: object
+      required:
+        - epoch
+        - iso
+      properties:
+        epoch:
+          type: integer
+          description: Unix timestamp in seconds
+          example: 1740441600
+        iso:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp
+          example: '2026-02-25T00:00:00.000Z'
+    MaintenanceWindow:
+      type: object
+      required:
+        - declaredAt
+        - startTime
+        - endTime
+      properties:
+        declaredAt:
+          type: string
+          format: date-time
+          example: '2026-02-24T12:00:00.000Z'
+        startTime:
+          type: string
+          format: date-time
+          example: '2026-02-25T00:00:00.000Z'
+        endTime:
+          type: string
+          format: date-time
+          example: '2026-02-25T02:00:00.000Z'
+        reason:
+          type:
+            - string
+            - 'null'
+          example: Scheduled maintenance
+    ExchangeStatus:
+      type: object
+      required:
+        - inMaintenance
+      properties:
+        inMaintenance:
+          type: boolean
+          description: Whether the exchange is currently in maintenance mode
+          example: false
+        currentWindow:
+          oneOf:
+            - $ref: '#/components/schemas/MaintenanceWindow'
+            - type: 'null'
+          description: Current maintenance window, if active
+        nextWindow:
+          oneOf:
+            - $ref: '#/components/schemas/MaintenanceWindow'
+            - type: 'null'
+          description: Next scheduled maintenance window
+    TickerInfo:
+      type: object
+      required:
+        - ticker
+        - index
+        - openInterest
+        - volumePastDay
+        - cumFunding
+        - updatedAt
+      properties:
+        ticker:
+          type: string
+          example: OPENAI
+        index:
+          type: string
+          description: Underlying attention index name
+          example: OPENAI-IDX
+        movingFundingRate:
+          type:
+            - number
+            - 'null'
+          description: >-
+            Estimated next funding rate based on the average premium index in
+            the current funding window
+          example: 0.0001
+        lastSettledFundingRate:
+          type:
+            - number
+            - 'null'
+          description: Last settled funding rate
+          example: 0.0001
+        lastPrice:
+          type:
+            - number
+            - 'null'
+          description: Last trade price in cents
+          example: 10550
+        markPrice:
+          type:
+            - number
+            - 'null'
+          description: >-
+            Fair-value mark price in cents used for unrealized PnL and
+            liquidation checks
+          example: 10525
+        bestBid:
+          type:
+            - number
+            - 'null'
+          description: Best bid price in cents
+          example: 10500
+        bestAsk:
+          type:
+            - number
+            - 'null'
+          description: Best ask price in cents
+          example: 10600
+        openInterest:
+          type: number
+          description: Total open interest in contracts
+          example: 1234
+        highPastDay:
+          type:
+            - number
+            - 'null'
+          description: 24-hour high price in cents
+          example: 11000
+        lowPastDay:
+          type:
+            - number
+            - 'null'
+          description: 24-hour low price in cents
+          example: 10000
+        volumePastDay:
+          type: number
+          description: 24-hour trading volume in cents
+          example: 500000
+        changePercentPastDay:
+          type:
+            - number
+            - 'null'
+          description: 24-hour price change percentage
+          example: 2.5
+        changePastDay:
+          type:
+            - number
+            - 'null'
+          description: 24-hour price change in cents
+          example: 250
+        cumFunding:
+          type: number
+          description: >-
+            Running cumulative sum of all settled funding rates for a market. A
+            position's accrued funding is `qty * (cumFunding -
+            position.lastCumFunding)`.
+          example: 0.0023
+        fundingAvgPastWeek:
+          type:
+            - number
+            - 'null'
+          description: Average funding rate over the past week
+          example: 0.0001
+        fundingHighPastWeek:
+          type:
+            - number
+            - 'null'
+          description: Highest funding rate over the past week
+          example: 0.0003
+        fundingLowPastWeek:
+          type:
+            - number
+            - 'null'
+          description: Lowest funding rate over the past week
+          example: -0.0001
+        lastIndexValue:
+          type:
+            - number
+            - 'null'
+          description: Latest attention index value
+          example: 100
+        changeIndexPercentPastDay:
+          type:
+            - number
+            - 'null'
+          description: 24-hour index change percentage
+          example: 0.06
+        changeIndexPastDay:
+          type:
+            - number
+            - 'null'
+          description: 24-hour index change
+          example: 1.5
+        changeIndexPercentPastWeek:
+          type:
+            - number
+            - 'null'
+          description: Past week index change percentage
+          example: 0.06
+        changeIndexPastWeek:
+          type:
+            - number
+            - 'null'
+          description: Past week index change
+          example: 3
+        changeIndexPercentPastMonth:
+          type:
+            - number
+            - 'null'
+          description: Past month index change percentage
+          example: 0.06
+        changeIndexPastMonth:
+          type:
+            - number
+            - 'null'
+          description: Past month index change
+          example: 10
+        changeIndexPercentPastYear:
+          type:
+            - number
+            - 'null'
+          description: Past year index change percentage
+          example: 0.06
+        changeIndexPastYear:
+          type:
+            - number
+            - 'null'
+          description: Past year index change
+          example: 10
+        changeIndexPercentAllTime:
+          type:
+            - number
+            - 'null'
+          description: All time index change percentage
+          example: 0.06
+        changeIndexAllTime:
+          type:
+            - number
+            - 'null'
+          description: All time index change
+          example: 50
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp (ISO 8601)
+          example: '2025-02-25T00:00:00.000Z'
+    Market:
+      allOf:
+        - $ref: '#/components/schemas/TickerInfo'
+        - type: object
+          required:
+            - name
+            - createdAt
+            - category
+            - expiryDate
+            - picture
+            - live
+            - lastFunding
+            - initialOpenTime
+            - aboutDesc
+          properties:
+            name:
+              type: string
+              description: Market display name
+              example: OpenAI
+            createdAt:
+              type: string
+              format: date-time
+              example: '2025-01-01T00:00:00.000Z'
+            category:
+              type: string
+              description: Market category
+              example: tech
+            subCategory:
+              type:
+                - string
+                - 'null'
+              example: Artificial intelligence
+            expiryDate:
+              type: string
+              format: date-time
+              example: '2025-12-31T00:00:00.000Z'
+            picture:
+              type: string
+              format: uri
+              description: Market icon URL (not currently in use)
+              example: https://example.com/openai.png
+            live:
+              type: boolean
+              description: Whether the market is currently active for trading
+              example: true
+            lastFunding:
+              type: string
+              format: date-time
+              description: Last funding settlement time
+              example: '2026-02-25T08:00:00.000Z'
+            initialOpenTime:
+              type: string
+              format: date-time
+              description: When the market first opened for trading
+              example: '2025-01-15T00:00:00.000Z'
+            aboutDesc:
+              type: string
+              description: Description of the market
+              example: A perpetual futures contract tracking OpenAI's attention index.
+    BookLevel:
+      type: object
+      required:
+        - price
+        - qty
+      properties:
+        price:
+          type: number
+          description: Price level in cents
+          example: 10500
+        qty:
+          type: number
+          description: Total quantity at this price level
+          example: 10
+    OrderBook:
+      type: object
+      required:
+        - ticker
+        - bids
+        - asks
+        - seq
+        - updatedAt
+      properties:
+        ticker:
+          type: string
+          example: OPENAI
+        bids:
+          type: array
+          maxItems: 100
+          description: Bid levels sorted by descending price in cents
+          items:
+            $ref: '#/components/schemas/BookLevel'
+        asks:
+          type: array
+          maxItems: 100
+          description: Ask levels sorted by ascending price in cents
+          items:
+            $ref: '#/components/schemas/BookLevel'
+        seq:
+          type: integer
+          description: Sequence number for gap detection
+          example: 12345
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp (ISO 8601)
+          example: '2026-02-25T12:00:00.000Z'
+    PublicTrade:
+      type: object
+      required:
+        - tradeId
+        - ticker
+        - price
+        - quantity
+        - takerSide
+        - timestamp
+      properties:
+        tradeId:
+          type: integer
+          description: Unique trade identifier
+          example: 5678
+        ticker:
+          type: string
+          example: OPENAI
+        price:
+          type: number
+          description: Trade price in cents
+          example: 10550
+        quantity:
+          type: number
+          example: 5
+        takerSide:
+          type: string
+          enum:
+            - buy
+            - sell
+          description: Side of the taker order
+          example: buy
+        timestamp:
+          type: string
+          format: date-time
+          example: '2026-02-25T12:00:00.100Z'
+    CandlestickRecord:
+      type: object
+      required:
+        - ticker
+        - interval
+        - start
+        - open
+        - high
+        - low
+        - close
+        - volume
+        - active
+      properties:
+        ticker:
+          type: string
+          example: OPENAI
+        interval:
+          type: string
+          enum:
+            - 1m
+            - 5m
+            - 1d
+          example: 1m
+        start:
+          type: string
+          format: date-time
+          description: Candle period start time
+          example: '2026-02-25T12:00:00.000Z'
+        open:
+          type: number
+          description: Opening price in cents
+          example: 10500
+        high:
+          type: number
+          description: Highest price in cents
+          example: 10600
+        low:
+          type: number
+          description: Lowest price in cents
+          example: 10450
+        close:
+          type: number
+          description: Closing price in cents
+          example: 10550
+        volume:
+          type: number
+          description: Volume in cents
+          example: 150
+        active:
+          type: boolean
+          description: Whether this candle is still in its active period
+          example: true
+    FundingRateInfo:
+      type: object
+      required:
+        - ticker
+      properties:
+        ticker:
+          type: string
+          example: OPENAI
+        fundingRate:
+          type:
+            - number
+            - 'null'
+          description: Last settled funding rate
+          example: 0.0001
+        movingFundingRate:
+          type:
+            - number
+            - 'null'
+          description: >-
+            Estimated next funding rate based on the average premium index in
+            the current funding window
+          example: 0.00012
+        lastPrice:
+          type:
+            - number
+            - 'null'
+          description: Last trade price in cents
+          example: 10550
+        indexValue:
+          type:
+            - number
+            - 'null'
+          description: Current attention index value
+          example: 100
+        nextFundingTime:
+          type:
+            - string
+            - 'null'
+          format: date-time
+          description: Next funding settlement time
+          example: '2026-02-25T08:00:00.000Z'
+    FundingHistoryRecord:
+      type: object
+      required:
+        - ticker
+        - fundingRate
+        - timestamp
+      properties:
+        ticker:
+          type: string
+          example: OPENAI
+        fundingRate:
+          type: number
+          example: 0.0001
+        timestamp:
+          type: string
+          format: date-time
+          example: '2026-02-25T00:00:00.000Z'
+    SourceMetric:
+      type: object
+      required:
+        - shortName
+        - displayName
+        - weight
+        - type
+        - frequency
+        - hasHistory
+      properties:
+        shortName:
+          type: string
+          example: new_videos
+        displayName:
+          type: string
+          example: New videos
+        weight:
+          type: number
+          minimum: 0
+          maximum: 1
+          example: 0.7
+        type:
+          type: string
+          enum:
+            - raw
+            - difference
+          description: >-
+            Type of metric. Difference requires computing a delta (e.g., change
+            in followers)
+          example: raw
+        curr:
+          type: object
+          properties:
+            value:
+              type: number
+              description: Latest value before transformation
+              example: 100000
+            diff:
+              type: number
+              description: >-
+                Latest delta before transformation (only applies for metrics of
+                type `difference`)
+              example: 500
+        frequency:
+          type: number
+          description: Update frequency in seconds
+          example: 3600
+        hasHistory:
+          type: boolean
+          example: true
+        metadata:
+          type: object
+    SourceConfig:
+      type: object
+      required:
+        - name
+        - displayName
+        - picture
+        - weight
+        - frequency
+        - hasHistory
+        - metrics
+      properties:
+        name:
+          type: string
+          description: Source platform identifier
+          enum:
+            - youtube
+            - x
+            - reddit
+            - google_trends
+          example: youtube
+        displayName:
+          type: string
+          example: YouTube
+        picture:
+          type: string
+          format: uri
+          example: https://example.com/youtube.png
+        weight:
+          type: number
+          description: Source weight in index calculation
+          minimum: 0
+          maximum: 1
+          example: 0.5
+        frequency:
+          type: number
+          description: Update frequency in seconds
+          example: 3600
+        currValue:
+          type:
+            - number
+            - 'null'
+          description: Current source value
+          example: 50
+        hasHistory:
+          type: boolean
+          example: true
+        metadata:
+          type: object
+        metrics:
+          type: array
+          items:
+            $ref: '#/components/schemas/SourceMetric'
+        dayPercentChangeSigned:
+          type:
+            - number
+            - 'null'
+          example: 0.06
+        weekPercentChangeSigned:
+          type:
+            - number
+            - 'null'
+          example: 0.08
+        monthPercentChangeSigned:
+          type:
+            - number
+            - 'null'
+          example: 0.1
+        yearPercentChangeSigned:
+          type:
+            - number
+            - 'null'
+          example: 0.12
+        allTimePercentChangeSigned:
+          type:
+            - number
+            - 'null'
+          example: 0.32
+    IndexRecord:
+      type: object
+      required:
+        - name
+        - createdAt
+        - sources
+        - sourceConfigs
+        - interval
+        - ready
+        - live
+      properties:
+        name:
+          type: string
+          description: Index identifier
+          example: OPENAI-IDX
+        createdAt:
+          type: string
+          format: date-time
+          example: '2025-01-01T00:00:00.000Z'
+        lastUpdate:
+          type:
+            - string
+            - 'null'
+          format: date-time
+          description: Last time the index was updated
+          example: '2026-02-25T12:00:00.000Z'
+        currentValue:
+          type:
+            - number
+            - 'null'
+          description: Current computed index value
+          example: 100.5
+        sources:
+          type: array
+          items:
+            type: string
+          description: List of source platform names
+          example:
+            - youtube
+            - x
+            - reddit
+        sourceConfigs:
+          type: array
+          items:
+            $ref: '#/components/schemas/SourceConfig'
+        interval:
+          type: number
+          description: Update interval in seconds
+          example: 3600
+        ready:
+          type: boolean
+          description: >-
+            Whether sufficient metric data has been collected for the index to
+            be listed
+          example: true
+        live:
+          type: boolean
+          description: Whether the index is actively updating
+          example: true
+    IndexHistoryRecord:
+      type: object
+      required:
+        - id
+        - name
+        - value
+        - raw
+        - timestamp
+        - sourceValues
+      properties:
+        id:
+          type: integer
+          example: 123
+        name:
+          type: string
+          example: OPENAI-IDX
+        value:
+          type: number
+          description: Index value after EMA applied
+          example: 100.5
+        raw:
+          type: number
+          description: Raw index value before EMA
+          example: 100.3
+        timestamp:
+          type: string
+          format: date-time
+          example: '2026-02-25T00:00:00.000Z'
+        sourceValues:
+          type: object
+          additionalProperties:
+            type: number
+          description: Per-source values at this timestamp before weighted sum and EMA
+          example:
+            youtube: 50
+            x: 30
+            reddit: 20.5
+    CreateOrderRequest:
+      type: object
+      required:
+        - ticker
+        - side
+        - qty
+        - orderType
+      properties:
+        ticker:
+          type: string
+          description: Market ticker symbol
+          example: OPENAI
+        side:
+          type: string
+          enum:
+            - buy
+            - sell
+          example: buy
+        qty:
+          type: number
+          description: Order quantity (positive)
+          example: 10
+        price:
+          type: number
+          description: >-
+            Limit price in cents. Required for limit orders, must not be set for
+            market orders.
+          example: 10050
+        orderType:
+          type: string
+          enum:
+            - market
+            - limit
+          description: |
+            - `market`: Execute immediately at best available price
+            - `limit`: Place at a specific price
+          example: limit
+        timeInForce:
+          type: string
+          enum:
+            - goodTillCancel
+            - fillOrKill
+            - fillAndKill
+          description: >
+            Time-in-force policy. Required for limit orders, must not be set for
+            market orders.
+
+            - `goodTillCancel`: Rests on the book until filled or cancelled
+
+            - `fillOrKill`: Must fill entirely immediately or be cancelled
+
+            - `fillAndKill`: Fill as much as possible immediately, cancel
+            remainder
+          example: goodTillCancel
+        clientOrderId:
+          type: string
+          description: Client-generated order ID for idempotency and tracking
+          example: my-order-001
+        postOnly:
+          type: boolean
+          default: false
+          description: >-
+            Reject if the order would match immediately (maker-only). Only valid
+            for limit orders with goodTillCancel time-in-force.
+          example: false
+        reduceOnly:
+          type: boolean
+          default: false
+          description: Order can only reduce an existing position
+          example: false
+        selfTradePreventionMode:
+          type: string
+          enum:
+            - cr
+            - ci
+            - cb
+          default: cr
+          description: |
+            Self-trade prevention mode:
+            - `cr`: Cancel resting order
+            - `ci`: Cancel incoming order
+            - `cb`: Cancel both orders
+          example: cr
+    OrderRecord:
+      type: object
+      required:
+        - id
+        - createdAt
+        - clientOrderId
+        - userId
+        - lockedNotional
+        - postOnly
+        - reduceOnly
+        - selfTradePreventionMode
+      properties:
+        id:
+          type: integer
+          description: >-
+            Unique order identifier. Used in path parameters for GET/DELETE
+            `/orders/{orderId}` and in batch cancel requests.
+          example: 12345
+        createdAt:
+          type: string
+          format: date-time
+          example: '2026-02-25T12:00:00.000Z'
+        updatedAt:
+          type:
+            - string
+            - 'null'
+          format: date-time
+          example: '2026-02-25T12:00:01.000Z'
+        clientOrderId:
+          type: string
+          description: Client-provided or server-generated order ID
+          example: my-order-001
+        userId:
+          type: integer
+          example: 42
+        ticker:
+          type:
+            - string
+          example: OPENAI
+        side:
+          type:
+            - string
+          enum:
+            - buy
+            - sell
+          example: buy
+        orderType:
+          type:
+            - string
+          enum:
+            - market
+            - limit
+          example: limit
+        timeInForce:
+          type:
+            - string
+            - 'null'
+          enum:
+            - goodTillCancel
+            - fillOrKill
+            - fillAndKill
+            - null
+          description: Time-in-force policy. Null for market orders.
+          example: goodTillCancel
+        price:
+          type:
+            - number
+            - 'null'
+          description: Limit price in cents. Null for market orders.
+          example: 10050
+        quantity:
+          type:
+            - number
+          description: Original order quantity
+          example: 10
+        remainingQuantity:
+          type:
+            - number
+          description: >-
+            Unfilled quantity remaining unless status is `cancelled` or
+            `rejected`
+          example: 10
+        status:
+          type:
+            - string
+          enum:
+            - resting
+            - partiallyFilled
+            - filled
+            - cancelled
+            - rejected
+          description: |
+            - `resting`: On the order book, waiting to be filled
+            - `partiallyFilled`: Some quantity has been filled
+            - `filled`: Fully filled
+            - `cancelled`: Cancelled by user or system
+            - `rejected`: Rejected by matching engine
+          example: resting
+        engineOrderId:
+          type:
+            - integer
+            - 'null'
+          description: >-
+            Internal matching engine order ID. Null while the order is awaiting
+            engine acknowledgment.
+          example: 456
+        lockedNotional:
+          type: number
+          description: Cash initially held for this order in cents
+          example: 500
+        postOnly:
+          type: boolean
+          example: false
+        reduceOnly:
+          type: boolean
+          example: false
+        selfTradePreventionMode:
+          type: string
+          enum:
+            - cr
+            - ci
+            - cb
+          example: cr
+    PaginatedOrders:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderRecord'
+        nextCursor:
+          type:
+            - string
+            - 'null'
+          description: Cursor for the next page. Null if no more results.
+          example: abc123
+    BatchCreateRequest:
+      type: object
+      required:
+        - orders
+      properties:
+        orders:
+          type: array
+          minItems: 1
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/CreateOrderRequest'
+    BatchCreateResult:
+      type: object
+      required:
+        - orders
+      properties:
+        orders:
+          type: array
+          items:
+            type: object
+            properties:
+              clientOrderId:
+                type: string
+                example: my-order-001
+              order:
+                $ref: '#/components/schemas/OrderRecord'
+              error:
+                type: string
+                description: Error message if this individual order failed
+                example: Insufficient margin
+    BatchCancelRequest:
+      type: object
+      required:
+        - orderIds
+      properties:
+        orderIds:
+          type: array
+          description: Order IDs
+          minItems: 1
+          maxItems: 20
+          items:
+            type: integer
+          example:
+            - 123
+            - 456
+            - 789
+    BatchCancelResult:
+      type: object
+      required:
+        - cancellations
+      properties:
+        cancellations:
+          type: array
+          items:
+            type: object
+            required:
+              - orderId
+              - success
+            properties:
+              orderId:
+                type: integer
+                example: 123
+              success:
+                type: boolean
+                example: true
+              error:
+                type: string
+                description: Error message if cancellation failed
+    CancelAllResult:
+      type: object
+      required:
+        - cancelled
+        - orders
+      properties:
+        cancelled:
+          type: integer
+          description: Number of orders cancelled
+          example: 3
+        orders:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderRecord'
+    Fill:
+      type: object
+      required:
+        - userId
+        - tradeId
+        - orderId
+        - qty
+        - ticker
+        - isTaker
+        - side
+        - price
+        - executedAt
+      properties:
+        userId:
+          type: integer
+          example: 42
+        tradeId:
+          type: integer
+          description: Unique trade identifier
+          example: 789
+        orderId:
+          type: integer
+          description: Associated order ID
+          example: 123
+        qty:
+          type: number
+          description: Filled quantity
+          example: 5
+        ticker:
+          type: string
+          example: OPENAI
+        isTaker:
+          type: boolean
+          description: Whether this fill was on the taker side
+          example: true
+        side:
+          type: string
+          enum:
+            - buy
+            - sell
+          example: buy
+        price:
+          type: number
+          description: Execution price in cents
+          example: 10550
+        executedAt:
+          type: string
+          format: date-time
+          description: Execution timestamp
+          example: '2026-02-25T12:00:01.000Z'
+    PaginatedFills:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Fill'
+        nextCursor:
+          type:
+            - string
+            - 'null'
+          description: Cursor for the next page. Null if no more results.
+          example: abc123
+    PositionRecord:
+      type: object
+      required:
+        - id
+        - createdAt
+        - userId
+        - ticker
+        - qty
+        - avgEntryPrice
+        - realizedTradePnl
+        - lastUpdated
+        - realizedFundingPnl
+        - realizedFundingPnlAtOpen
+        - lastCumFunding
+      properties:
+        id:
+          type: integer
+          example: 1
+        createdAt:
+          type: string
+          format: date-time
+          description: Position creation time (time of initial entry)
+          example: '2026-02-20T00:00:00.000Z'
+        userId:
+          type: integer
+          example: 42
+        ticker:
+          type: string
+          example: OPENAI
+        qty:
+          type: number
+          description: Position size. Positive for long, negative for short.
+          example: 5
+        avgEntryPrice:
+          type: number
+          description: Average entry price in cents
+          example: 10000
+        realizedTradePnl:
+          type: number
+          description: Realized PnL from trades in cents
+          example: 20000
+        lastUpdated:
+          type: string
+          format: date-time
+          example: '2026-02-25T12:00:00.000Z'
+        realizedFundingPnl:
+          type: number
+          description: Net realized PnL from funding settlements in cents
+          example: 5000
+        realizedFundingPnlAtOpen:
+          type: number
+          description: >-
+            Snapshot of `realizedFundingPnl` captured when the current position
+            lifecycle began (flat --> open or long <--> short flip). Funding
+            realized since the position was opened is `realizedFundingPnl -
+            realizedFundingPnlAtOpen`.
+          example: 3000
+        lastCumFunding:
+          type: number
+          description: >-
+            Snapshot of the market's `cumFunding` at the time the position's
+            quantity last changed. See `cumFunding` in the `GET
+            /markets/{ticker}` response for how accrued funding is computed.
+          example: 0.0023
+    PositionsResponse:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PositionRecord'
+    Account:
+      type: object
+      required:
+        - userId
+        - asset
+        - locked
+        - accruedFunding
+        - realizedFunding
+        - equity
+        - unrealizedPnl
+        - realizedPnl
+        - initialMargin
+        - maintenanceMargin
+        - freeMargin
+        - marginRatio
+        - status
+      properties:
+        userId:
+          type: integer
+          example: 42
+        asset:
+          type: string
+          description: Account denomination
+          example: USD
+        locked:
+          type: number
+          description: Cash locked in open orders in cents
+          example: 5000
+        accruedFunding:
+          type: number
+          description: >-
+            Accrued but unsettled funding in cents. Funding officially settles
+            on changes to position quantity.
+          example: 12
+        realizedFunding:
+          type: number
+          description: Total realized funding payments in cents
+          example: 50
+        equity:
+          type: number
+          description: Total portfolio value in cents
+          example: 105000
+        unrealizedPnl:
+          type: number
+          description: Unrealized profit and loss across all positions in cents
+          example: 500
+        realizedPnl:
+          type: number
+          description: Total realized profit and loss in cents
+          example: 200
+        initialMargin:
+          type: number
+          description: Total initial margin requirement in cents
+          example: 5000
+        maintenanceMargin:
+          type: number
+          description: Total maintenance margin requirement in cents
+          example: 2500
+        freeMargin:
+          type: number
+          description: Margin available for new orders in cents
+          example: 97500
+        marginRatio:
+          type: number
+          description: Current margin ratio (maintenance margin / equity)
+          example: 0.024
+        status:
+          type: string
+          enum:
+            - healthy
+            - reduce_only
+            - liquidating
+          description: |
+            - `healthy`: Normal trading
+            - `reduce_only`: Can only close existing positions
+            - `liquidating`: Account is being liquidated
+          example: healthy
+  parameters:
+    TickerPath:
+      name: ticker
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Market ticker symbol
+      example: OPENAI
+    IndexNamePath:
+      name: name
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Index name
+      example: OPENAI-IDX
+    OrderIdPath:
+      name: orderId
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: Order ID
+      example: 12345
+    ClientOrderIdPath:
+      name: clientOrderId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Client-provided order ID
+      example: my-order-001
+  responses:
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: INVALID_PARAMETER
+              message: Request validation failed
+              details:
+                fields:
+                  - field: ticker
+                    message: Required
+    Unauthorized:
+      description: Missing or invalid authentication
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: UNAUTHORIZED
+              message: Missing or invalid authentication
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: INSUFFICIENT_PERMISSIONS
+              message: API key lacks required permission
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: NOT_FOUND
+              message: Resource not found
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: RATE_LIMIT_EXCEEDED
+              message: Rate limit exceeded. Try again in 5 seconds.
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: INTERNAL_ERROR
+              message: An unexpected error occurred
+paths:
+  /time:
+    get:
+      operationId: getServerTime
+      summary: Get server time
+      description: >-
+        Returns the current server time. Use this to measure clock skew for HMAC
+        signature generation.
+      tags:
+        - Exchange
+      security: []
+      responses:
+        '200':
+          description: Server time
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerTime'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /exchange/status:
+    get:
+      operationId: getExchangeStatus
+      summary: Get exchange status
+      description: Returns the current exchange operational status and maintenance windows.
+      tags:
+        - Exchange
+      security: []
+      responses:
+        '200':
+          description: Exchange status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeStatus'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /markets:
+    get:
+      operationId: listMarkets
+      summary: List all markets
+      description: >-
+        Returns all available markets with their current ticker data. Pagination
+        will be added as the number of markets grows.
+      tags:
+        - Markets
+      security: []
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+          description: Filter by market category
+          example: tech
+      responses:
+        '200':
+          description: List of markets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Market'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /markets/{ticker}:
+    get:
+      operationId: getMarket
+      summary: Get market
+      description: >-
+        Returns details for a specific market, including current prices and
+        statistics.
+      tags:
+        - Markets
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/TickerPath'
+      responses:
+        '200':
+          description: Market details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Market'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /markets/{ticker}/book:
+    get:
+      operationId: getOrderBook
+      summary: Get order book
+      description: >-
+        Returns the current order book snapshot for a market. Use sequence
+        numbers with WebSocket `book_updates` channel for real-time updates.
+      tags:
+        - Market Data
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/TickerPath'
+        - name: depth
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Number of price levels per side
+      responses:
+        '200':
+          description: Order book snapshot
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderBook'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /markets/{ticker}/trades:
+    get:
+      operationId: getRecentTrades
+      summary: Get recent trades
+      description: >-
+        Returns recent public trades for a market. A trade occurs at the price
+        of the maker (resting) order.
+      tags:
+        - Market Data
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/TickerPath'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 100
+          description: Maximum number of trades to return
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: Opaque pagination cursor from a previous response
+      responses:
+        '200':
+          description: Recent trades
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - nextCursor
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PublicTrade'
+                  nextCursor:
+                    type: string
+                    nullable: true
+                    description: >-
+                      Opaque cursor for fetching the next page, or null if no
+                      more results
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /markets/{ticker}/candles:
+    get:
+      operationId: getCandles
+      summary: Get candlestick data
+      description: Returns OHLCV candlestick data for a market within a time range.
+      tags:
+        - Market Data
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/TickerPath'
+        - name: interval
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - 1m
+              - 5m
+              - 1d
+          description: Candle interval
+        - name: start
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+          description: Start time (ISO 8601)
+          example: '2026-02-24T00:00:00.000Z'
+        - name: end
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: End time (ISO 8601). Defaults to current time.
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 2500
+            default: 2500
+          description: Maximum number of candles to return
+      responses:
+        '200':
+          description: Candlestick data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CandlestickRecord'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /indices/{name}:
+    get:
+      operationId: getIndex
+      summary: Get index details
+      description: >-
+        Returns the current attention index value with source breakdown. Forum's
+        indices aggregate attention metrics from social, search, and streaming
+        data to derive the underlying value for contracts.
+      tags:
+        - Indices
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/IndexNamePath'
+      responses:
+        '200':
+          description: Index details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndexRecord'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /indices/{name}/history:
+    get:
+      operationId: getIndexHistory
+      summary: Get index history
+      description: Returns historical index values within a time range.
+      tags:
+        - Indices
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/IndexNamePath'
+        - name: start
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+          description: Start time (ISO 8601)
+          example: '2026-02-24T00:00:00.000Z'
+        - name: end
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: End time (ISO 8601). Defaults to current time.
+        - name: interval
+          in: query
+          schema:
+            type: string
+            enum:
+              - raw
+              - 8h
+              - 1d
+            default: raw
+          description: Data resolution
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 2500
+            default: 2500
+      responses:
+        '200':
+          description: Index history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IndexHistoryRecord'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /markets/{ticker}/funding-rate:
+    get:
+      operationId: getFundingRate
+      summary: Get current funding rate
+      description: >-
+        Returns the last and estimated next funding rate as well as last price,
+        index value, and next funding time for a market.
+      tags:
+        - Funding
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/TickerPath'
+      responses:
+        '200':
+          description: Funding rate information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FundingRateInfo'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /markets/{ticker}/funding-history:
+    get:
+      operationId: getFundingHistory
+      summary: Get funding rate history
+      description: Returns historical funding rates within a time range.
+      tags:
+        - Funding
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/TickerPath'
+        - name: start
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+          description: Start time (ISO 8601)
+          example: '2026-02-24T00:00:00.000Z'
+        - name: end
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: End time (ISO 8601). Defaults to current time.
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 2500
+            default: 2500
+      responses:
+        '200':
+          description: Funding rate history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FundingHistoryRecord'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /orders:
+    post:
+      operationId: createOrder
+      summary: Place an order
+      description: Place a new order in a market. Requires `trade` permission.
+      tags:
+        - Orders
+      security:
+        - ForumAccessKey: []
+          ForumAccessTimestamp: []
+          ForumAccessSign: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+      responses:
+        '201':
+          description: Order placed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderRecord'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: Order rejected (insufficient margin, reduce-only violation, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: INSUFFICIENT_MARGIN
+                  message: Insufficient margin to place order
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    get:
+      operationId: listOrders
+      summary: List open orders
+      description: Returns open orders with optional filtering. Requires `read` permission.
+      tags:
+        - Orders
+      security:
+        - ForumAccessKey: []
+          ForumAccessTimestamp: []
+          ForumAccessSign: []
+      parameters:
+        - name: ticker
+          in: query
+          schema:
+            type: string
+          description: Filter by market ticker
+        - name: side
+          in: query
+          schema:
+            type: string
+            enum:
+              - buy
+              - sell
+          description: Filter by order side
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 100
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: Opaque pagination cursor from a previous response
+      responses:
+        '200':
+          description: Paginated list of orders
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOrders'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    delete:
+      operationId: cancelAllOrders
+      summary: Cancel all open orders
+      description: >-
+        Cancel all open orders, optionally filtered by market ticker. Requires
+        `trade` permission.
+      tags:
+        - Orders
+      security:
+        - ForumAccessKey: []
+          ForumAccessTimestamp: []
+          ForumAccessSign: []
+      parameters:
+        - name: ticker
+          in: query
+          schema:
+            type: string
+          description: Cancel only orders for this market
+      responses:
+        '200':
+          description: Cancellation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelAllResult'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /orders/{orderId}:
+    get:
+      operationId: getOrder
+      summary: Get order by ID
+      description: >-
+        Returns an order by its exchange-assigned ID. Requires `read`
+        permission.
+      tags:
+        - Orders
+      security:
+        - ForumAccessKey: []
+          ForumAccessTimestamp: []
+          ForumAccessSign: []
+      parameters:
+        - $ref: '#/components/parameters/OrderIdPath'
+      responses:
+        '200':
+          description: Order details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderRecord'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    delete:
+      operationId: cancelOrder
+      summary: Cancel order by ID
+      description: >-
+        Cancel an open order by its exchange-assigned ID. Requires `trade`
+        permission.
+      tags:
+        - Orders
+      security:
+        - ForumAccessKey: []
+          ForumAccessTimestamp: []
+          ForumAccessSign: []
+      parameters:
+        - $ref: '#/components/parameters/OrderIdPath'
+      responses:
+        '200':
+          description: Cancelled order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderRecord'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /orders/client/{clientOrderId}:
+    get:
+      operationId: getOrderByClientId
+      summary: Get order by client order ID
+      description: Returns an order by its client-provided ID. Requires `read` permission.
+      tags:
+        - Orders
+      security:
+        - ForumAccessKey: []
+          ForumAccessTimestamp: []
+          ForumAccessSign: []
+      parameters:
+        - $ref: '#/components/parameters/ClientOrderIdPath'
+      responses:
+        '200':
+          description: Order details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderRecord'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    delete:
+      operationId: cancelOrderByClientId
+      summary: Cancel order by client order ID
+      description: >-
+        Cancel an open order by its client-provided ID. Requires `trade`
+        permission.
+      tags:
+        - Orders
+      security:
+        - ForumAccessKey: []
+          ForumAccessTimestamp: []
+          ForumAccessSign: []
+      parameters:
+        - $ref: '#/components/parameters/ClientOrderIdPath'
+      responses:
+        '200':
+          description: Cancelled order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderRecord'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /orders/batch:
+    post:
+      operationId: batchCreateOrders
+      summary: Place multiple orders
+      description: >-
+        Place up to 10 orders in a single request. Each order is processed
+        independently. Requires `trade` permission.
+      tags:
+        - Orders
+      security:
+        - ForumAccessKey: []
+          ForumAccessTimestamp: []
+          ForumAccessSign: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchCreateRequest'
+      responses:
+        '201':
+          description: Batch creation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchCreateResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    delete:
+      operationId: batchCancelOrders
+      summary: Cancel multiple orders
+      description: >-
+        Cancel up to 20 orders in a single request. Each cancellation is
+        processed independently. Requires `trade` permission.
+      tags:
+        - Orders
+      security:
+        - ForumAccessKey: []
+          ForumAccessTimestamp: []
+          ForumAccessSign: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchCancelRequest'
+      responses:
+        '200':
+          description: Batch cancellation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchCancelResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /fills:
+    get:
+      operationId: listFills
+      summary: List fills
+      description: >-
+        Returns trade executions (fills) for the authenticated user. Requires
+        `read` permission.
+      tags:
+        - Fills
+      security:
+        - ForumAccessKey: []
+          ForumAccessTimestamp: []
+          ForumAccessSign: []
+      parameters:
+        - name: ticker
+          in: query
+          schema:
+            type: string
+          description: Filter by market ticker
+        - name: orderId
+          in: query
+          schema:
+            type: integer
+          description: Filter by order ID
+        - name: start
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Start time filter (ISO 8601)
+        - name: end
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: End time filter (ISO 8601)
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 100
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: Opaque pagination cursor from a previous response
+      responses:
+        '200':
+          description: Paginated list of fills
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFills'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /positions:
+    get:
+      operationId: listPositions
+      summary: List all positions
+      description: >-
+        Returns all open positions for the authenticated user. Requires `read`
+        permission.
+      tags:
+        - Positions
+      security:
+        - ForumAccessKey: []
+          ForumAccessTimestamp: []
+          ForumAccessSign: []
+      responses:
+        '200':
+          description: Positions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PositionsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /positions/{ticker}:
+    get:
+      operationId: getPosition
+      summary: Get position by ticker
+      description: Returns the position for a specific market. Requires `read` permission.
+      tags:
+        - Positions
+      security:
+        - ForumAccessKey: []
+          ForumAccessTimestamp: []
+          ForumAccessSign: []
+      parameters:
+        - $ref: '#/components/parameters/TickerPath'
+      responses:
+        '200':
+          description: Position details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PositionRecord'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /account:
+    get:
+      operationId: getAccount
+      summary: Get account summary
+      description: >-
+        Returns account summary including balances, margin, PnL, and account
+        health status. Requires `read` permission.
+      tags:
+        - Account
+      security:
+        - ForumAccessKey: []
+          ForumAccessTimestamp: []
+          ForumAccessSign: []
+      responses:
+        '200':
+          description: Account summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'

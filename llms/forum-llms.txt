@@ -1,0 +1,81 @@
+# Forum Docs
+
+## Docs
+
+- [Get account summary](https://docs.forum.market/api-reference/account/get-account-summary.md): Returns account summary including balances, margin, PnL, and account health status. Requires `read` permission.
+- [Authentication](https://docs.forum.market/api-reference/authentication.md): HMAC-SHA256 signature authentication for private API endpoints.
+- [Errors](https://docs.forum.market/api-reference/concepts/errors.md): Error response format and complete error code reference.
+- [Order Book](https://docs.forum.market/api-reference/concepts/order-book.md): Maintain a local order book using REST snapshots and WebSocket incremental updates.
+- [Pagination](https://docs.forum.market/api-reference/concepts/pagination.md): Cursor-based and time-range pagination patterns.
+- [Rate Limits](https://docs.forum.market/api-reference/concepts/rate-limits.md): Request rate limits, response headers, and best practices.
+- [Get exchange status](https://docs.forum.market/api-reference/exchange/get-exchange-status.md): Returns the current exchange operational status and maintenance windows.
+- [Get server time](https://docs.forum.market/api-reference/exchange/get-server-time.md): Returns the current server time. Use this to measure clock skew for HMAC signature generation.
+- [List fills](https://docs.forum.market/api-reference/fills/list-fills.md): Returns trade executions (fills) for the authenticated user. Requires `read` permission.
+- [Get current funding rate](https://docs.forum.market/api-reference/funding/get-current-funding-rate.md): Returns the last and estimated next funding rate as well as last price, index value, and next funding time for a market.
+- [Get funding rate history](https://docs.forum.market/api-reference/funding/get-funding-rate-history.md): Returns historical funding rates within a time range.
+- [Get index details](https://docs.forum.market/api-reference/indices/get-index-details.md): Returns the current attention index value with source breakdown. Forum's indices aggregate attention metrics from social, search, and streaming data to derive the underlying value for contracts.
+- [Get index history](https://docs.forum.market/api-reference/indices/get-index-history.md): Returns historical index values within a time range.
+- [API Overview](https://docs.forum.market/api-reference/introduction.md): Programmatic access to Forum's exchange, which offers perpetual futures on attention.
+- [Get candlestick data](https://docs.forum.market/api-reference/market-data/get-candlestick-data.md): Returns OHLCV candlestick data for a market within a time range.
+- [Get order book](https://docs.forum.market/api-reference/market-data/get-order-book.md): Returns the current order book snapshot for a market. Use sequence numbers with WebSocket `book_updates` channel for real-time updates.
+- [Get recent trades](https://docs.forum.market/api-reference/market-data/get-recent-trades.md): Returns recent public trades for a market. A trade occurs at the price of the maker (resting) order.
+- [Get market](https://docs.forum.market/api-reference/markets/get-market.md): Returns details for a specific market, including current prices and statistics.
+- [List all markets](https://docs.forum.market/api-reference/markets/list-all-markets.md): Returns all available markets with their current ticker data. Pagination will be added as the number of markets grows.
+- [Cancel all open orders](https://docs.forum.market/api-reference/orders/cancel-all-open-orders.md): Cancel all open orders, optionally filtered by market ticker. Requires `trade` permission.
+- [Cancel multiple orders](https://docs.forum.market/api-reference/orders/cancel-multiple-orders.md): Cancel up to 20 orders in a single request. Each cancellation is processed independently. Requires `trade` permission.
+- [Cancel order by client order ID](https://docs.forum.market/api-reference/orders/cancel-order-by-client-order-id.md): Cancel an open order by its client-provided ID. Requires `trade` permission.
+- [Cancel order by ID](https://docs.forum.market/api-reference/orders/cancel-order-by-id.md): Cancel an open order by its exchange-assigned ID. Requires `trade` permission.
+- [Get order by client order ID](https://docs.forum.market/api-reference/orders/get-order-by-client-order-id.md): Returns an order by its client-provided ID. Requires `read` permission.
+- [Get order by ID](https://docs.forum.market/api-reference/orders/get-order-by-id.md): Returns an order by its exchange-assigned ID. Requires `read` permission.
+- [List open orders](https://docs.forum.market/api-reference/orders/list-open-orders.md): Returns open orders with optional filtering. Requires `read` permission.
+- [Place an order](https://docs.forum.market/api-reference/orders/place-an-order.md): Place a new order in a market. Requires `trade` permission.
+- [Place multiple orders](https://docs.forum.market/api-reference/orders/place-multiple-orders.md): Place up to 10 orders in a single request. Each order is processed independently. Requires `trade` permission.
+- [Get position by ticker](https://docs.forum.market/api-reference/positions/get-position-by-ticker.md): Returns the position for a specific market. Requires `read` permission.
+- [List all positions](https://docs.forum.market/api-reference/positions/list-all-positions.md): Returns all open positions for the authenticated user. Requires `read` permission.
+- [Quick Start](https://docs.forum.market/api-reference/quick-start.md): Go from zero to your first trade in four steps.
+- [WebSocket Authentication](https://docs.forum.market/api-reference/websocket/authentication.md): Authenticate WebSocket connections for private channel access.
+- [WebSocket Connection](https://docs.forum.market/api-reference/websocket/connection.md): Connect to Forum's WebSocket feed for real-time market data and order updates.
+- [Auth](https://docs.forum.market/api-reference/websockets/auth.md): Authenticate the connection for private channel access using HMAC-SHA256. The signature signs: `timestamp + "GET" + "/ws/v1"`.
+- [Book updates](https://docs.forum.market/api-reference/websockets/bookupdates.md): Real-time order book updates. On subscribe, the server sends a full book snapshot, then incremental updates.
+- [Candle updates 1d](https://docs.forum.market/api-reference/websockets/candle-updates-1d.md): Live 1-day candlestick updates. The `active` field indicates whether the candle is still open.
+- [Candle updates 1m](https://docs.forum.market/api-reference/websockets/candle-updates-1m.md): Live 1-minute candlestick updates. The `active` field indicates whether the candle is still open.
+- [Candle updates 5m](https://docs.forum.market/api-reference/websockets/candle-updates-5m.md): Live 5-minute candlestick updates. The `active` field indicates whether the candle is still open.
+- [Errors](https://docs.forum.market/api-reference/websockets/errors.md): General error responses sent when a command fails validation or cannot be processed.
+- [Funding events](https://docs.forum.market/api-reference/websockets/fundingevents.md): Funding events. Emitted daily when funding occurs.
+- [Heartbeat](https://docs.forum.market/api-reference/websockets/heartbeat.md): Application-level heartbeat. Emitted every 1 second per subscribed ticker. Useful for low-volume markets to confirm the connection and server are alive.
+- [Index updates](https://docs.forum.market/api-reference/websockets/indexupdates.md): Live attention index value updates, including changes to underlying metrics.
+- [List subscriptions](https://docs.forum.market/api-reference/websockets/listsubscriptions.md): List all current subscriptions on this connection.
+- [Logout](https://docs.forum.market/api-reference/websockets/logout.md): Log out the authenticated user and remove all private channel subscriptions.
+- [Subscribe](https://docs.forum.market/api-reference/websockets/subscribe.md): Subscribe to one or more channels for the specified tickers. Subscriptions are additive — they do not replace existing subscriptions.
+- [Ticker updates](https://docs.forum.market/api-reference/websockets/tickerupdates.md): Level 1 market data updates including last price, best bid/ask, volume, funding rates, and index data.
+- [Trades](https://docs.forum.market/api-reference/websockets/trades.md): Real-time public trade feed. Each message represents a single executed trade.
+- [Unsubscribe](https://docs.forum.market/api-reference/websockets/unsubscribe.md): Unsubscribe from one or more channels for the specified tickers.
+- [User account](https://docs.forum.market/api-reference/websockets/useraccount.md): Real-time account margin and PnL updates for the authenticated user.
+- [User fills](https://docs.forum.market/api-reference/websockets/userfills.md): Real-time trade execution notifications for the authenticated user.
+- [User orders](https://docs.forum.market/api-reference/websockets/userorders.md): Real-time order lifecycle updates for the authenticated user. Streams all order state transitions (resting, partially filled, filled, cancelled).
+- [User positions](https://docs.forum.market/api-reference/websockets/userpositions.md): Real-time position updates for the authenticated user. Includes `prevQty` to track position size changes.
+- [API Changelog](https://docs.forum.market/changelog.md): API updates, new features, and breaking changes.
+- [Feedback](https://docs.forum.market/guide/feedback.md): We would love to hear from you!
+- [Fees](https://docs.forum.market/guide/fees.md): We charge no fees on any of our trades.
+- [Funding](https://docs.forum.market/guide/funding.md): How we keep the market price in-line with the index value in the near-term.
+- [Overview](https://docs.forum.market/guide/index-overview.md): The Attention Index is Forum’s measure of public interest in a topic.
+- [Leaderboard](https://docs.forum.market/guide/leaderboard.md): The leaderboard is public.
+- [Leverage](https://docs.forum.market/guide/leverage.md): Forum offers no leverage (1x) on any trade.
+- [Liquidations](https://docs.forum.market/guide/liquidations.md): We close positions to protect your account and the market.
+- [Margining](https://docs.forum.market/guide/margining.md): Forum perpetual-style contracts use 1x leverage and cross (portfolio-level) margining.
+- [Mark Price](https://docs.forum.market/guide/mark-price.md): How Forum computes a fair reference price for risk management.
+- [Market Making](https://docs.forum.market/guide/market-making.md): Forum provides liquidity on the platform by making markets internally.
+- [Methodology](https://docs.forum.market/guide/mechanics.md): We calculate our index using simple transformations across a variety of sources/metrics.
+- [Opening an Account](https://docs.forum.market/guide/opening-an-account.md): Basic steps:
+- [Orders](https://docs.forum.market/guide/orders.md): Standard market and limit orders are supported.
+- [Overview](https://docs.forum.market/guide/perp-overview.md): Perpetual-style futures are designed to give market participants synthetic long or short exposure to any underlying asset.
+- [What is Forum?](https://docs.forum.market/guide/what-is-forum.md): Forum is a centralized exchange offering exposure to engagement-backed assets.
+- [Why Make Forum?](https://docs.forum.market/guide/why-make-forum.md): The attention economy needs a market.
+
+## OpenAPI Specs
+
+- [openapi](https://docs.forum.market/openapi.yaml)
+
+## AsyncAPI Specs
+
+- [asyncapi](https://docs.forum.market/asyncapi.yaml)

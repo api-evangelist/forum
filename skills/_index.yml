@@ -1,0 +1,20 @@
+generated: '2026-07-20'
+method: searched
+source: https://docs.forum.market/.well-known/agent-skills/forum/skill.md
+skills:
+- file: forum.md
+  name: Forum
+  api: openapi/forum-openapi-original.yml
+  description: >-
+    Provider-published Agent Skill for building trading bots, market-data
+    integrations, and order-management systems on Forum's perpetual futures on
+    attention indices — authenticate (HMAC-SHA256), place/cancel orders, stream
+    market data via WebSocket, and query account/position information.
+  operations:
+  - listMarkets
+  - getMarket
+  - getOrderBook
+  - getAccount
+  - createOrder
+  - cancelOrder
+  - listPositions

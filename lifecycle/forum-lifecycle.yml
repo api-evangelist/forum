@@ -1,0 +1,22 @@
+generated: '2026-07-20'
+method: searched
+source: https://docs.forum.market/changelog
+versioning:
+  scheme: uri-path
+  current: v1
+  docs: https://docs.forum.market/api-reference/introduction
+deprecation:
+  policy_url: null
+  sunset_header: false
+  note: No deprecation/Sunset policy published; API is at initial v1.0 (launched Feb 2026).
+sla:
+  url: null
+  uptime_target: null
+status_page: null
+status_note: >-
+  No public status page (status.forum.market did not resolve at probe time).
+  Operational status is exposed programmatically via GET /v1/exchange/status
+  (getExchangeStatus), which also reports maintenance windows.
+changelog: https://docs.forum.market/changelog
+changelog_ref: changelog/forum-changelog.yml
+deprecated_operations: []

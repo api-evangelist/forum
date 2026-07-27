@@ -1,0 +1,10 @@
+generated: '2026-07-20'
+method: derived
+source: openapi/forum-openapi-original.yml
+workflows:
+- file: forum-place-order.yml
+  workflowId: discoverAndPlaceOrder
+  title: Discover a market and place an order
+  summary: >-
+    Check exchange status, list attention-index markets, inspect one, place an
+    idempotent limit order (clientOrderId), confirm it, and read position/account.

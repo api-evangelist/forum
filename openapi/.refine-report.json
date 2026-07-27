@@ -1,0 +1,30 @@
+{
+  "provider": "forum",
+  "sources": [
+    "forum-account-api-openapi.yml",
+    "forum-exchange-api-openapi.yml",
+    "forum-fills-api-openapi.yml",
+    "forum-funding-api-openapi.yml",
+    "forum-indices-api-openapi.yml",
+    "forum-market-data-api-openapi.yml",
+    "forum-markets-api-openapi.yml",
+    "forum-orders-api-openapi.yml",
+    "forum-positions-api-openapi.yml"
+  ],
+  "outputs": [
+    "forum-account-api-openapi.yml",
+    "forum-exchange-api-openapi.yml",
+    "forum-fills-api-openapi.yml",
+    "forum-funding-api-openapi.yml",
+    "forum-indices-api-openapi.yml",
+    "forum-market-data-api-openapi.yml",
+    "forum-markets-api-openapi.yml",
+    "forum-orders-api-openapi.yml",
+    "forum-positions-api-openapi.yml"
+  ],
+  "archived": [],
+  "errors": [],
+  "warnings": [],
+  "notes": [],
+  "skipped": []
+}

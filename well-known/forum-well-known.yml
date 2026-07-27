@@ -1,0 +1,28 @@
+generated: '2026-07-20'
+method: searched
+source: docs.forum.market Link header + live probes
+host: https://docs.forum.market
+documents:
+- path: /.well-known/mcp/server-card.json
+  status: 200
+  file: forum-mcp-server-card.json
+- path: /.well-known/agent-card.json
+  status: 200
+  file: forum-agent-card.json
+- path: /.well-known/agent-skills/index.json
+  status: 200
+  file: forum-agent-skills-index.json
+- path: /llms.txt
+  status: 200
+  file: ../llms/forum-llms.txt
+- path: /.well-known/api-catalog
+  status: 404
+- path: /.well-known/security.txt
+  status: 404
+notes: >-
+  docs.forum.market (Mintlify) advertises an agent-native discovery surface via
+  its Link header: llms-txt, api-catalog, mcp-server-card, agent-card and
+  agent-skills. The api-catalog and security.txt paths advertised in the Link
+  header returned 404 at probe time. The apex host forum.market returned 404 for
+  all /.well-known/ OIDC/OAuth/security paths (no OAuth surface; auth is
+  HMAC-SHA256 API-key signing).

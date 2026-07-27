@@ -1,0 +1,48 @@
+generated: '2026-07-20'
+method: searched
+source: https://docs.forum.market/api-reference
+authentication:
+  style: hmac-signature
+  scheme: HMAC-SHA256
+  headers: [FORUM-ACCESS-KEY, FORUM-ACCESS-TIMESTAMP, FORUM-ACCESS-SIGN]
+  prehash: 'timestamp + method + requestPath + body'
+  timestamp_window_seconds: 30
+  permissions: [read, trade]
+  ref: authentication/forum-authentication.yml
+idempotency:
+  supported: true
+  mechanism: client-order-id
+  field: clientOrderId
+  scope: order creation (createOrder, batchCreateOrders)
+  conflict_error: DUPLICATE_CLIENT_ORDER_ID (HTTP 400)
+  lookup: 'GET /v1/orders/client/{clientOrderId}'
+  note: >-
+    Client-generated order IDs make order placement idempotent and independently
+    trackable; a reused clientOrderId is rejected rather than duplicated.
+pagination:
+  styles: [cursor, time-range]
+  cursor:
+    request_param: cursor
+    response_field: nextCursor
+    semantics: opaque cursor; nextCursor is null when there are no more results
+  time_range:
+    params: [start, end]
+    used_by: [getIndexHistory, getFundingHistory, getCandles, listFills]
+versioning:
+  scheme: uri-path
+  current: v1
+  base_url: https://api.forum.market/v1
+  websocket_base: wss://api.forum.market/ws/v1
+rate_limiting:
+  algorithm: sliding-window (last 60 seconds)
+  headers: [X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After]
+  status: 429 RATE_LIMIT_EXCEEDED
+  ref: rate-limits/forum-rate-limits.yml
+error_envelope:
+  shape: '{ "error": { "code": string, "message": string, "details"?: object } }'
+  format: custom (not RFC 9457)
+  ref: errors/forum-error-codes.yml
+time_sync:
+  server_time_endpoint: 'GET /v1/time (getServerTime)'
+  purpose: measure clock skew before generating HMAC timestamps (401 TIMESTAMP_EXPIRED guard)
+content_type: application/json

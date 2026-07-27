@@ -1,0 +1,15 @@
+generated: '2026-07-20'
+method: searched
+source: https://docs.forum.market/changelog
+scheme: semver
+current_version: '1.0.0'
+entries:
+- version: '1.0.0'
+  date: '2026-02'
+  label: Forum API v1.0 Launch
+  breaking: false
+  additions:
+  - REST API for market data, order management, account, and position endpoints
+  - WebSocket feed for real-time order book, ticker, trades, index, and funding updates
+  - HMAC-SHA256 authentication with API key management (read and trade permissions)
+  highlights: Public API and WebSocket feed now available for programmatic access.
