@@ -180,7 +180,7 @@ common:
 - type: ChangeLog
   url: changelog/forum-changelog.yml
 - type: OpenAPI
-  url: openapi/forum-openapi-original.yml
+  url: openapi/_original/forum-openapi-original.yml
 - type: AsyncAPI
   url: asyncapi/forum-websocket-asyncapi.yml
 - type: Webhooks
