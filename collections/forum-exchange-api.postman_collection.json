@@ -1,0 +1,306 @@
+{
+  "item": [
+    {
+      "id": "ef6f6b33-0eb3-4a55-9d8e-c12de3b4e3be",
+      "name": "Exchange",
+      "description": {
+        "content": "Exchange status and server time",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "30e9b7df-8e77-41f1-8f9e-c0c8ddca1b16",
+          "name": "Get server time",
+          "request": {
+            "name": "Get server time",
+            "description": {
+              "content": "Returns the current server time. Use this to measure clock skew for HMAC signature generation.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "time"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "d6279266-eb31-4ce3-9d22-c37dffddb07b",
+              "name": "Server time",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "time"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "FORUM-ACCESS-KEY",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"epoch\": 1740441600,\n  \"iso\": \"2026-02-25T00:00:00.000Z\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "cc85d2b4-9690-48b6-8b20-c92e2183d328",
+              "name": "Rate limit exceeded",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "time"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "FORUM-ACCESS-KEY",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Seconds to wait before retrying",
+                  "key": "Retry-After",
+                  "value": "6636"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"RATE_LIMIT_EXCEEDED\",\n    \"message\": \"Rate limit exceeded. Try again in 5 seconds.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "6815d161-5d64-44da-ae8f-0ff414cf79c8",
+          "name": "Get exchange status",
+          "request": {
+            "name": "Get exchange status",
+            "description": {
+              "content": "Returns the current exchange operational status and maintenance windows.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "exchange",
+                "status"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "108968b3-0b04-49f6-8e65-4ae8acc021ce",
+              "name": "Exchange status",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "exchange",
+                    "status"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "FORUM-ACCESS-KEY",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"inMaintenance\": false,\n  \"currentWindow\": {\n    \"declaredAt\": \"2026-02-24T12:00:00.000Z\",\n    \"startTime\": \"2026-02-25T00:00:00.000Z\",\n    \"endTime\": \"2026-02-25T02:00:00.000Z\",\n    \"reason\": \"Scheduled maintenance\"\n  },\n  \"nextWindow\": {\n    \"declaredAt\": \"2026-02-24T12:00:00.000Z\",\n    \"startTime\": \"2026-02-25T00:00:00.000Z\",\n    \"endTime\": \"2026-02-25T02:00:00.000Z\",\n    \"reason\": \"Scheduled maintenance\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "1730f5ac-8fa1-4601-8e7c-e08216bb8935",
+              "name": "Rate limit exceeded",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "exchange",
+                    "status"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "FORUM-ACCESS-KEY",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Seconds to wait before retrying",
+                  "key": "Retry-After",
+                  "value": "6636"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"RATE_LIMIT_EXCEEDED\",\n    \"message\": \"Rate limit exceeded. Try again in 5 seconds.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://api.forum.market/v1",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "FORUM-ACCESS-KEY"
+      },
+      {
+        "key": "value",
+        "value": "{{apiKey}}"
+      },
+      {
+        "key": "in",
+        "value": "header"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "543c4352-93dc-4782-ba32-f337a93ab34d",
+    "name": "Forum Account Exchange API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "The Forum API provides programmatic access to the Forum perpetual futures exchange.\nTrade attention-based perpetual futures, access real-time market data, and manage your account.\n\n## Base URL\n\nAll endpoints are relative to `https://api.forum.market/v1`.\n\n## Authentication\n\nPublic endpoints (market data, exchange status) require no authentication.\nPrivate endpoints (orders, positions, account) require HMAC-SHA256 signed requests.\n\nSee the [Authentication](/api-reference/authentication) guide for details.\n\n\nContact Support:\n Name: Forum Support\n Email: contact@forum.market",
+      "type": "text/plain"
+    }
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Forum Account Fills API",
+    "version": "1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "apikey",
+      "key": "FORUM-ACCESS-KEY",
+      "value": "{{FORUM-ACCESS-KEY}}",
+      "placement": "header"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Fills",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List fills",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.forum.market/v1/fills",
+            "params": [
+              {
+                "name": "ticker",
+                "value": "",
+                "type": "query",
+                "description": "Filter by market ticker"
+              },
+              {
+                "name": "orderId",
+                "value": "",
+                "type": "query",
+                "description": "Filter by order ID"
+              },
+              {
+                "name": "start",
+                "value": "",
+                "type": "query",
+                "description": "Start time filter (ISO 8601)"
+              },
+              {
+                "name": "end",
+                "value": "",
+                "type": "query",
+                "description": "End time filter (ISO 8601)"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "cursor",
+                "value": "",
+                "type": "query",
+                "description": "Opaque pagination cursor from a previous response"
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "FORUM-ACCESS-KEY",
+              "value": "{{FORUM-ACCESS-KEY}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Returns trade executions (fills) for the authenticated user. Requires `read` permission."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

@@ -1,0 +1,68 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Forum Account Positions API",
+    "version": "1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "apikey",
+      "key": "FORUM-ACCESS-KEY",
+      "value": "{{FORUM-ACCESS-KEY}}",
+      "placement": "header"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Positions",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List all positions",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.forum.market/v1/positions",
+            "auth": {
+              "type": "apikey",
+              "key": "FORUM-ACCESS-KEY",
+              "value": "{{FORUM-ACCESS-KEY}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Returns all open positions for the authenticated user. Requires `read` permission."
+        },
+        {
+          "info": {
+            "name": "Get position by ticker",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.forum.market/v1/positions/:ticker",
+            "params": [
+              {
+                "name": "ticker",
+                "value": "OPENAI",
+                "type": "path",
+                "description": "Market ticker symbol"
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "FORUM-ACCESS-KEY",
+              "value": "{{FORUM-ACCESS-KEY}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Returns the position for a specific market. Requires `read` permission."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

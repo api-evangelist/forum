@@ -1,0 +1,87 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Forum Account Indices API",
+    "version": "1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "apikey",
+      "key": "FORUM-ACCESS-KEY",
+      "value": "{{FORUM-ACCESS-KEY}}",
+      "placement": "header"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Indices",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get index details",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.forum.market/v1/indices/:name",
+            "params": [
+              {
+                "name": "name",
+                "value": "OPENAI-IDX",
+                "type": "path",
+                "description": "Index name"
+              }
+            ]
+          },
+          "docs": "Returns the current attention index value with source breakdown. Forum's indices aggregate attention metrics from social, search, and streaming data to derive the underlying value for contracts."
+        },
+        {
+          "info": {
+            "name": "Get index history",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.forum.market/v1/indices/:name/history",
+            "params": [
+              {
+                "name": "name",
+                "value": "OPENAI-IDX",
+                "type": "path",
+                "description": "Index name"
+              },
+              {
+                "name": "start",
+                "value": "2026-02-24T00:00:00.000Z",
+                "type": "query",
+                "description": "Start time (ISO 8601)"
+              },
+              {
+                "name": "end",
+                "value": "",
+                "type": "query",
+                "description": "End time (ISO 8601). Defaults to current time."
+              },
+              {
+                "name": "interval",
+                "value": "",
+                "type": "query",
+                "description": "Data resolution"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query"
+              }
+            ]
+          },
+          "docs": "Returns historical index values within a time range."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

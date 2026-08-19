@@ -1,0 +1,64 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Forum Account Markets API",
+    "version": "1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "apikey",
+      "key": "FORUM-ACCESS-KEY",
+      "value": "{{FORUM-ACCESS-KEY}}",
+      "placement": "header"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Markets",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List all markets",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.forum.market/v1/markets",
+            "params": [
+              {
+                "name": "category",
+                "value": "tech",
+                "type": "query",
+                "description": "Filter by market category"
+              }
+            ]
+          },
+          "docs": "Returns all available markets with their current ticker data. Pagination will be added as the number of markets grows."
+        },
+        {
+          "info": {
+            "name": "Get market",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.forum.market/v1/markets/:ticker",
+            "params": [
+              {
+                "name": "ticker",
+                "value": "OPENAI",
+                "type": "path",
+                "description": "Market ticker symbol"
+              }
+            ]
+          },
+          "docs": "Returns details for a specific market, including current prices and statistics."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

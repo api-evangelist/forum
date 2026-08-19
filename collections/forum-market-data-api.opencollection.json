@@ -1,0 +1,125 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Forum Account Market Data API",
+    "version": "1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "apikey",
+      "key": "FORUM-ACCESS-KEY",
+      "value": "{{FORUM-ACCESS-KEY}}",
+      "placement": "header"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Market Data",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get order book",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.forum.market/v1/markets/:ticker/book",
+            "params": [
+              {
+                "name": "ticker",
+                "value": "OPENAI",
+                "type": "path",
+                "description": "Market ticker symbol"
+              },
+              {
+                "name": "depth",
+                "value": "",
+                "type": "query",
+                "description": "Number of price levels per side"
+              }
+            ]
+          },
+          "docs": "Returns the current order book snapshot for a market. Use sequence numbers with WebSocket `book_updates` channel for real-time updates."
+        },
+        {
+          "info": {
+            "name": "Get recent trades",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.forum.market/v1/markets/:ticker/trades",
+            "params": [
+              {
+                "name": "ticker",
+                "value": "OPENAI",
+                "type": "path",
+                "description": "Market ticker symbol"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number of trades to return"
+              },
+              {
+                "name": "cursor",
+                "value": "",
+                "type": "query",
+                "description": "Opaque pagination cursor from a previous response"
+              }
+            ]
+          },
+          "docs": "Returns recent public trades for a market. A trade occurs at the price of the maker (resting) order."
+        },
+        {
+          "info": {
+            "name": "Get candlestick data",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.forum.market/v1/markets/:ticker/candles",
+            "params": [
+              {
+                "name": "ticker",
+                "value": "OPENAI",
+                "type": "path",
+                "description": "Market ticker symbol"
+              },
+              {
+                "name": "interval",
+                "value": "",
+                "type": "query",
+                "description": "Candle interval"
+              },
+              {
+                "name": "start",
+                "value": "2026-02-24T00:00:00.000Z",
+                "type": "query",
+                "description": "Start time (ISO 8601)"
+              },
+              {
+                "name": "end",
+                "value": "",
+                "type": "query",
+                "description": "End time (ISO 8601). Defaults to current time."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number of candles to return"
+              }
+            ]
+          },
+          "docs": "Returns OHLCV candlestick data for a market within a time range."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

@@ -1,0 +1,256 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Forum Account Orders API",
+    "version": "1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "apikey",
+      "key": "FORUM-ACCESS-KEY",
+      "value": "{{FORUM-ACCESS-KEY}}",
+      "placement": "header"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Orders",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List open orders",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.forum.market/v1/orders",
+            "params": [
+              {
+                "name": "ticker",
+                "value": "",
+                "type": "query",
+                "description": "Filter by market ticker"
+              },
+              {
+                "name": "side",
+                "value": "",
+                "type": "query",
+                "description": "Filter by order side"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "cursor",
+                "value": "",
+                "type": "query",
+                "description": "Opaque pagination cursor from a previous response"
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "FORUM-ACCESS-KEY",
+              "value": "{{FORUM-ACCESS-KEY}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Returns open orders with optional filtering. Requires `read` permission."
+        },
+        {
+          "info": {
+            "name": "Place an order",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.forum.market/v1/orders",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "FORUM-ACCESS-KEY",
+              "value": "{{FORUM-ACCESS-KEY}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Place a new order in a market. Requires `trade` permission."
+        },
+        {
+          "info": {
+            "name": "Cancel all open orders",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.forum.market/v1/orders",
+            "params": [
+              {
+                "name": "ticker",
+                "value": "",
+                "type": "query",
+                "description": "Cancel only orders for this market"
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "FORUM-ACCESS-KEY",
+              "value": "{{FORUM-ACCESS-KEY}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Cancel all open orders, optionally filtered by market ticker. Requires `trade` permission."
+        },
+        {
+          "info": {
+            "name": "Get order by ID",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.forum.market/v1/orders/:orderId",
+            "params": [
+              {
+                "name": "orderId",
+                "value": "12345",
+                "type": "path",
+                "description": "Order ID"
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "FORUM-ACCESS-KEY",
+              "value": "{{FORUM-ACCESS-KEY}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Returns an order by its exchange-assigned ID. Requires `read` permission."
+        },
+        {
+          "info": {
+            "name": "Cancel order by ID",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.forum.market/v1/orders/:orderId",
+            "params": [
+              {
+                "name": "orderId",
+                "value": "12345",
+                "type": "path",
+                "description": "Order ID"
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "FORUM-ACCESS-KEY",
+              "value": "{{FORUM-ACCESS-KEY}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Cancel an open order by its exchange-assigned ID. Requires `trade` permission."
+        },
+        {
+          "info": {
+            "name": "Get order by client order ID",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.forum.market/v1/orders/client/:clientOrderId",
+            "params": [
+              {
+                "name": "clientOrderId",
+                "value": "my-order-001",
+                "type": "path",
+                "description": "Client-provided order ID"
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "FORUM-ACCESS-KEY",
+              "value": "{{FORUM-ACCESS-KEY}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Returns an order by its client-provided ID. Requires `read` permission."
+        },
+        {
+          "info": {
+            "name": "Cancel order by client order ID",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.forum.market/v1/orders/client/:clientOrderId",
+            "params": [
+              {
+                "name": "clientOrderId",
+                "value": "my-order-001",
+                "type": "path",
+                "description": "Client-provided order ID"
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "FORUM-ACCESS-KEY",
+              "value": "{{FORUM-ACCESS-KEY}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Cancel an open order by its client-provided ID. Requires `trade` permission."
+        },
+        {
+          "info": {
+            "name": "Place multiple orders",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.forum.market/v1/orders/batch",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "FORUM-ACCESS-KEY",
+              "value": "{{FORUM-ACCESS-KEY}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Place up to 10 orders in a single request. Each order is processed independently. Requires `trade` permission."
+        },
+        {
+          "info": {
+            "name": "Cancel multiple orders",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.forum.market/v1/orders/batch",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "FORUM-ACCESS-KEY",
+              "value": "{{FORUM-ACCESS-KEY}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Cancel up to 20 orders in a single request. Each cancellation is processed independently. Requires `trade` permission."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

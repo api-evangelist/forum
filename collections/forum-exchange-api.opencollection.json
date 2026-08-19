@@ -1,0 +1,48 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Forum Account Exchange API",
+    "version": "1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "apikey",
+      "key": "FORUM-ACCESS-KEY",
+      "value": "{{FORUM-ACCESS-KEY}}",
+      "placement": "header"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Exchange",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get server time",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.forum.market/v1/time"
+          },
+          "docs": "Returns the current server time. Use this to measure clock skew for HMAC signature generation."
+        },
+        {
+          "info": {
+            "name": "Get exchange status",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.forum.market/v1/exchange/status"
+          },
+          "docs": "Returns the current exchange operational status and maintenance windows."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

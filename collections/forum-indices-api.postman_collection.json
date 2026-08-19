@@ -1,0 +1,488 @@
+{
+  "item": [
+    {
+      "id": "e7058a4f-2324-4f99-aca7-bf9fa2b7708b",
+      "name": "Indices",
+      "description": {
+        "content": "Attention index values and history",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "a829bc2c-787f-4a2b-abd1-12944058267f",
+          "name": "Get index details",
+          "request": {
+            "name": "Get index details",
+            "description": {
+              "content": "Returns the current attention index value with source breakdown. Forum's indices aggregate attention metrics from social, search, and streaming data to derive the underlying value for contracts.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "indices",
+                ":name"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "name",
+                  "description": "(Required) Index name"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "593b00df-e1a1-4269-aa26-c0b480c063e4",
+              "name": "Index details",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "indices",
+                    ":name"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "name",
+                      "description": "(Required) Index name"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "FORUM-ACCESS-KEY",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"name\": \"OPENAI-IDX\",\n  \"createdAt\": \"2025-01-01T00:00:00.000Z\",\n  \"sources\": [\n    \"youtube\",\n    \"x\",\n    \"reddit\"\n  ],\n  \"sourceConfigs\": [\n    {\n      \"name\": \"youtube\",\n      \"displayName\": \"YouTube\",\n      \"picture\": \"https://example.com/youtube.png\",\n      \"weight\": 0.5,\n      \"frequency\": 3600,\n      \"hasHistory\": true,\n      \"metrics\": [\n        {\n          \"shortName\": \"new_videos\",\n          \"displayName\": \"New videos\",\n          \"weight\": 0.7,\n          \"type\": \"raw\",\n          \"frequency\": 3600,\n          \"hasHistory\": true,\n          \"curr\": {\n            \"value\": 100000,\n            \"diff\": 500\n          },\n          \"metadata\": {}\n        },\n        {\n          \"shortName\": \"new_videos\",\n          \"displayName\": \"New videos\",\n          \"weight\": 0.7,\n          \"type\": \"raw\",\n          \"frequency\": 3600,\n          \"hasHistory\": true,\n          \"curr\": {\n            \"value\": 100000,\n            \"diff\": 500\n          },\n          \"metadata\": {}\n        }\n      ],\n      \"currValue\": 50,\n      \"metadata\": {},\n      \"dayPercentChangeSigned\": 0.06,\n      \"weekPercentChangeSigned\": 0.08,\n      \"monthPercentChangeSigned\": 0.1,\n      \"yearPercentChangeSigned\": 0.12,\n      \"allTimePercentChangeSigned\": 0.32\n    },\n    {\n      \"name\": \"youtube\",\n      \"displayName\": \"YouTube\",\n      \"picture\": \"https://example.com/youtube.png\",\n      \"weight\": 0.5,\n      \"frequency\": 3600,\n      \"hasHistory\": true,\n      \"metrics\": [\n        {\n          \"shortName\": \"new_videos\",\n          \"displayName\": \"New videos\",\n          \"weight\": 0.7,\n          \"type\": \"raw\",\n          \"frequency\": 3600,\n          \"hasHistory\": true,\n          \"curr\": {\n            \"value\": 100000,\n            \"diff\": 500\n          },\n          \"metadata\": {}\n        },\n        {\n          \"shortName\": \"new_videos\",\n          \"displayName\": \"New videos\",\n          \"weight\": 0.7,\n          \"type\": \"raw\",\n          \"frequency\": 3600,\n          \"hasHistory\": true,\n          \"curr\": {\n            \"value\": 100000,\n            \"diff\": 500\n          },\n          \"metadata\": {}\n        }\n      ],\n      \"currValue\": 50,\n      \"metadata\": {},\n      \"dayPercentChangeSigned\": 0.06,\n      \"weekPercentChangeSigned\": 0.08,\n      \"monthPercentChangeSigned\": 0.1,\n      \"yearPercentChangeSigned\": 0.12,\n      \"allTimePercentChangeSigned\": 0.32\n    }\n  ],\n  \"interval\": 3600,\n  \"ready\": true,\n  \"live\": true,\n  \"lastUpdate\": \"2026-02-25T12:00:00.000Z\",\n  \"currentValue\": 100.5\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "5fc7ee88-ddaf-40e8-ad8d-e5fd1ef9c1e6",
+              "name": "Rate limit exceeded",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "indices",
+                    ":name"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "name",
+                      "description": "(Required) Index name"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "FORUM-ACCESS-KEY",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Seconds to wait before retrying",
+                  "key": "Retry-After",
+                  "value": "8044"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"RATE_LIMIT_EXCEEDED\",\n    \"message\": \"Rate limit exceeded. Try again in 5 seconds.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "21e3b145-aea8-4833-9cb3-c5e12865fdde",
+          "name": "Get index history",
+          "request": {
+            "name": "Get index history",
+            "description": {
+              "content": "Returns historical index values within a time range.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "indices",
+                ":name",
+                "history"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "start",
+                  "value": "<dateTime>",
+                  "description": "(Required) Start time (ISO 8601)"
+                },
+                {
+                  "disabled": false,
+                  "key": "end",
+                  "value": "<dateTime>",
+                  "description": "End time (ISO 8601). Defaults to current time."
+                },
+                {
+                  "disabled": false,
+                  "key": "interval",
+                  "value": "raw",
+                  "description": "Data resolution"
+                },
+                {
+                  "disabled": false,
+                  "key": "limit",
+                  "value": "2500"
+                }
+              ],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "name",
+                  "description": "(Required) Index name"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "b87d9c42-71fa-4a33-9119-1051e0a0f939",
+              "name": "Index history",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "indices",
+                    ":name",
+                    "history"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "start",
+                      "value": "2026-02-24T00:00:00.000Z"
+                    },
+                    {
+                      "key": "end",
+                      "value": "<dateTime>"
+                    },
+                    {
+                      "key": "interval",
+                      "value": "raw"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "2500"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "name",
+                      "description": "(Required) Index name"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "FORUM-ACCESS-KEY",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "[\n  {\n    \"id\": 123,\n    \"name\": \"OPENAI-IDX\",\n    \"value\": 100.5,\n    \"raw\": 100.3,\n    \"timestamp\": \"2026-02-25T00:00:00.000Z\",\n    \"sourceValues\": {\n      \"youtube\": 50,\n      \"x\": 30,\n      \"reddit\": 20.5\n    }\n  },\n  {\n    \"id\": 123,\n    \"name\": \"OPENAI-IDX\",\n    \"value\": 100.5,\n    \"raw\": 100.3,\n    \"timestamp\": \"2026-02-25T00:00:00.000Z\",\n    \"sourceValues\": {\n      \"youtube\": 50,\n      \"x\": 30,\n      \"reddit\": 20.5\n    }\n  }\n]",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "1acb3283-7013-48c8-9e0d-0602dd6b7f1f",
+              "name": "Invalid request parameters",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "indices",
+                    ":name",
+                    "history"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "start",
+                      "value": "2026-02-24T00:00:00.000Z"
+                    },
+                    {
+                      "key": "end",
+                      "value": "<dateTime>"
+                    },
+                    {
+                      "key": "interval",
+                      "value": "raw"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "2500"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "name",
+                      "description": "(Required) Index name"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "FORUM-ACCESS-KEY",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"INVALID_PARAMETER\",\n    \"message\": \"Request validation failed\",\n    \"details\": {\n      \"fields\": [\n        {\n          \"field\": \"ticker\",\n          \"message\": \"Required\"\n        }\n      ]\n    }\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "2603c2d9-b65c-4cf0-bc8d-c239c23c5173",
+              "name": "Rate limit exceeded",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "indices",
+                    ":name",
+                    "history"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "start",
+                      "value": "2026-02-24T00:00:00.000Z"
+                    },
+                    {
+                      "key": "end",
+                      "value": "<dateTime>"
+                    },
+                    {
+                      "key": "interval",
+                      "value": "raw"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "2500"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "name",
+                      "description": "(Required) Index name"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "FORUM-ACCESS-KEY",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Seconds to wait before retrying",
+                  "key": "Retry-After",
+                  "value": "8044"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"RATE_LIMIT_EXCEEDED\",\n    \"message\": \"Rate limit exceeded. Try again in 5 seconds.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://api.forum.market/v1",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "FORUM-ACCESS-KEY"
+      },
+      {
+        "key": "value",
+        "value": "{{apiKey}}"
+      },
+      {
+        "key": "in",
+        "value": "header"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "cb1f389f-6e40-4f1c-b08f-685d41ec3800",
+    "name": "Forum Account Indices API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "The Forum API provides programmatic access to the Forum perpetual futures exchange.\nTrade attention-based perpetual futures, access real-time market data, and manage your account.\n\n## Base URL\n\nAll endpoints are relative to `https://api.forum.market/v1`.\n\n## Authentication\n\nPublic endpoints (market data, exchange status) require no authentication.\nPrivate endpoints (orders, positions, account) require HMAC-SHA256 signed requests.\n\nSee the [Authentication](/api-reference/authentication) guide for details.\n\n\nContact Support:\n Name: Forum Support\n Email: contact@forum.market",
+      "type": "text/plain"
+    }
+  }
+}

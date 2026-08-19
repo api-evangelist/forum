@@ -1,0 +1,81 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Forum Account Funding API",
+    "version": "1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "apikey",
+      "key": "FORUM-ACCESS-KEY",
+      "value": "{{FORUM-ACCESS-KEY}}",
+      "placement": "header"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Funding",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get current funding rate",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.forum.market/v1/markets/:ticker/funding-rate",
+            "params": [
+              {
+                "name": "ticker",
+                "value": "OPENAI",
+                "type": "path",
+                "description": "Market ticker symbol"
+              }
+            ]
+          },
+          "docs": "Returns the last and estimated next funding rate as well as last price, index value, and next funding time for a market."
+        },
+        {
+          "info": {
+            "name": "Get funding rate history",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.forum.market/v1/markets/:ticker/funding-history",
+            "params": [
+              {
+                "name": "ticker",
+                "value": "OPENAI",
+                "type": "path",
+                "description": "Market ticker symbol"
+              },
+              {
+                "name": "start",
+                "value": "2026-02-24T00:00:00.000Z",
+                "type": "query",
+                "description": "Start time (ISO 8601)"
+              },
+              {
+                "name": "end",
+                "value": "",
+                "type": "query",
+                "description": "End time (ISO 8601). Defaults to current time."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query"
+              }
+            ]
+          },
+          "docs": "Returns historical funding rates within a time range."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

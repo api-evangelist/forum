@@ -1,0 +1,399 @@
+{
+  "item": [
+    {
+      "id": "4b6152a2-e205-482f-a7fc-335dfb0395fc",
+      "name": "Markets",
+      "description": {
+        "content": "Market listings and details",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "d5645ca1-890c-40f6-b7c8-ed8d427bf6dd",
+          "name": "List all markets",
+          "request": {
+            "name": "List all markets",
+            "description": {
+              "content": "Returns all available markets with their current ticker data. Pagination will be added as the number of markets grows.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "markets"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "category",
+                  "value": "<string>",
+                  "description": "Filter by market category"
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "3b37cc9e-7408-4d2e-8a2c-78a4b9268508",
+              "name": "List of markets",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "markets"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "category",
+                      "value": "tech"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "FORUM-ACCESS-KEY",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "[\n  {\n    \"aboutDesc\": \"A perpetual futures contract tracking OpenAI's attention index.\",\n    \"category\": \"tech\",\n    \"createdAt\": \"2025-01-01T00:00:00.000Z\",\n    \"cumFunding\": 0.0023,\n    \"expiryDate\": \"2025-12-31T00:00:00.000Z\",\n    \"index\": \"OPENAI-IDX\",\n    \"initialOpenTime\": \"2025-01-15T00:00:00.000Z\",\n    \"lastFunding\": \"2026-02-25T08:00:00.000Z\",\n    \"live\": true,\n    \"name\": \"OpenAI\",\n    \"openInterest\": 1234,\n    \"picture\": \"https://example.com/openai.png\",\n    \"ticker\": \"OPENAI\",\n    \"updatedAt\": \"2025-02-25T00:00:00.000Z\",\n    \"volumePastDay\": 500000,\n    \"movingFundingRate\": 0.0001,\n    \"lastSettledFundingRate\": 0.0001,\n    \"lastPrice\": 10550,\n    \"markPrice\": 10525,\n    \"bestBid\": 10500,\n    \"bestAsk\": 10600,\n    \"highPastDay\": 11000,\n    \"lowPastDay\": 10000,\n    \"changePercentPastDay\": 2.5,\n    \"changePastDay\": 250,\n    \"fundingAvgPastWeek\": 0.0001,\n    \"fundingHighPastWeek\": 0.0003,\n    \"fundingLowPastWeek\": -0.0001,\n    \"lastIndexValue\": 100,\n    \"changeIndexPercentPastDay\": 0.06,\n    \"changeIndexPastDay\": 1.5,\n    \"changeIndexPercentPastWeek\": 0.06,\n    \"changeIndexPastWeek\": 3,\n    \"changeIndexPercentPastMonth\": 0.06,\n    \"changeIndexPastMonth\": 10,\n    \"changeIndexPercentPastYear\": 0.06,\n    \"changeIndexPastYear\": 10,\n    \"changeIndexPercentAllTime\": 0.06,\n    \"changeIndexAllTime\": 50,\n    \"subCategory\": \"Artificial intelligence\"\n  },\n  {\n    \"aboutDesc\": \"A perpetual futures contract tracking OpenAI's attention index.\",\n    \"category\": \"tech\",\n    \"createdAt\": \"2025-01-01T00:00:00.000Z\",\n    \"cumFunding\": 0.0023,\n    \"expiryDate\": \"2025-12-31T00:00:00.000Z\",\n    \"index\": \"OPENAI-IDX\",\n    \"initialOpenTime\": \"2025-01-15T00:00:00.000Z\",\n    \"lastFunding\": \"2026-02-25T08:00:00.000Z\",\n    \"live\": true,\n    \"name\": \"OpenAI\",\n    \"openInterest\": 1234,\n    \"picture\": \"https://example.com/openai.png\",\n    \"ticker\": \"OPENAI\",\n    \"updatedAt\": \"2025-02-25T00:00:00.000Z\",\n    \"volumePastDay\": 500000,\n    \"movingFundingRate\": 0.0001,\n    \"lastSettledFundingRate\": 0.0001,\n    \"lastPrice\": 10550,\n    \"markPrice\": 10525,\n    \"bestBid\": 10500,\n    \"bestAsk\": 10600,\n    \"highPastDay\": 11000,\n    \"lowPastDay\": 10000,\n    \"changePercentPastDay\": 2.5,\n    \"changePastDay\": 250,\n    \"fundingAvgPastWeek\": 0.0001,\n    \"fundingHighPastWeek\": 0.0003,\n    \"fundingLowPastWeek\": -0.0001,\n    \"lastIndexValue\": 100,\n    \"changeIndexPercentPastDay\": 0.06,\n    \"changeIndexPastDay\": 1.5,\n    \"changeIndexPercentPastWeek\": 0.06,\n    \"changeIndexPastWeek\": 3,\n    \"changeIndexPercentPastMonth\": 0.06,\n    \"changeIndexPastMonth\": 10,\n    \"changeIndexPercentPastYear\": 0.06,\n    \"changeIndexPastYear\": 10,\n    \"changeIndexPercentAllTime\": 0.06,\n    \"changeIndexAllTime\": 50,\n    \"subCategory\": \"Artificial intelligence\"\n  }\n]",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "cc88cea0-8abe-4c0e-8b07-eef502854ee5",
+              "name": "Rate limit exceeded",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "markets"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "category",
+                      "value": "tech"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "FORUM-ACCESS-KEY",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Seconds to wait before retrying",
+                  "key": "Retry-After",
+                  "value": "5348"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"RATE_LIMIT_EXCEEDED\",\n    \"message\": \"Rate limit exceeded. Try again in 5 seconds.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "fc01e485-a1d3-4a5e-8b64-c05ba1eac0ec",
+          "name": "Get market",
+          "request": {
+            "name": "Get market",
+            "description": {
+              "content": "Returns details for a specific market, including current prices and statistics.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "markets",
+                ":ticker"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "ticker",
+                  "description": "(Required) Market ticker symbol"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "1f076c51-c519-4882-b67e-11a1baf83bd9",
+              "name": "Market details",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "markets",
+                    ":ticker"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "ticker",
+                      "description": "(Required) Market ticker symbol"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "FORUM-ACCESS-KEY",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"aboutDesc\": \"A perpetual futures contract tracking OpenAI's attention index.\",\n  \"category\": \"tech\",\n  \"createdAt\": \"2025-01-01T00:00:00.000Z\",\n  \"cumFunding\": 0.0023,\n  \"expiryDate\": \"2025-12-31T00:00:00.000Z\",\n  \"index\": \"OPENAI-IDX\",\n  \"initialOpenTime\": \"2025-01-15T00:00:00.000Z\",\n  \"lastFunding\": \"2026-02-25T08:00:00.000Z\",\n  \"live\": true,\n  \"name\": \"OpenAI\",\n  \"openInterest\": 1234,\n  \"picture\": \"https://example.com/openai.png\",\n  \"ticker\": \"OPENAI\",\n  \"updatedAt\": \"2025-02-25T00:00:00.000Z\",\n  \"volumePastDay\": 500000,\n  \"movingFundingRate\": 0.0001,\n  \"lastSettledFundingRate\": 0.0001,\n  \"lastPrice\": 10550,\n  \"markPrice\": 10525,\n  \"bestBid\": 10500,\n  \"bestAsk\": 10600,\n  \"highPastDay\": 11000,\n  \"lowPastDay\": 10000,\n  \"changePercentPastDay\": 2.5,\n  \"changePastDay\": 250,\n  \"fundingAvgPastWeek\": 0.0001,\n  \"fundingHighPastWeek\": 0.0003,\n  \"fundingLowPastWeek\": -0.0001,\n  \"lastIndexValue\": 100,\n  \"changeIndexPercentPastDay\": 0.06,\n  \"changeIndexPastDay\": 1.5,\n  \"changeIndexPercentPastWeek\": 0.06,\n  \"changeIndexPastWeek\": 3,\n  \"changeIndexPercentPastMonth\": 0.06,\n  \"changeIndexPastMonth\": 10,\n  \"changeIndexPercentPastYear\": 0.06,\n  \"changeIndexPastYear\": 10,\n  \"changeIndexPercentAllTime\": 0.06,\n  \"changeIndexAllTime\": 50,\n  \"subCategory\": \"Artificial intelligence\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "7b55bd76-8743-4519-af73-bf8733cdb0da",
+              "name": "Resource not found",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "markets",
+                    ":ticker"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "ticker",
+                      "description": "(Required) Market ticker symbol"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "FORUM-ACCESS-KEY",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"NOT_FOUND\",\n    \"message\": \"Resource not found\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "a9b58e9a-82ba-4d6c-a88a-8240dd391cc0",
+              "name": "Rate limit exceeded",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "markets",
+                    ":ticker"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "ticker",
+                      "description": "(Required) Market ticker symbol"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "FORUM-ACCESS-KEY",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Seconds to wait before retrying",
+                  "key": "Retry-After",
+                  "value": "5348"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"RATE_LIMIT_EXCEEDED\",\n    \"message\": \"Rate limit exceeded. Try again in 5 seconds.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://api.forum.market/v1",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "FORUM-ACCESS-KEY"
+      },
+      {
+        "key": "value",
+        "value": "{{apiKey}}"
+      },
+      {
+        "key": "in",
+        "value": "header"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "d6eb5f55-62d1-40b4-b083-53f7e7e8421e",
+    "name": "Forum Account Markets API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "The Forum API provides programmatic access to the Forum perpetual futures exchange.\nTrade attention-based perpetual futures, access real-time market data, and manage your account.\n\n## Base URL\n\nAll endpoints are relative to `https://api.forum.market/v1`.\n\n## Authentication\n\nPublic endpoints (market data, exchange status) require no authentication.\nPrivate endpoints (orders, positions, account) require HMAC-SHA256 signed requests.\n\nSee the [Authentication](/api-reference/authentication) guide for details.\n\n\nContact Support:\n Name: Forum Support\n Email: contact@forum.market",
+      "type": "text/plain"
+    }
+  }
+}
