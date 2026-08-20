@@ -45,6 +45,16 @@ tags:
 - Attention Economy
 - Fintech
 - WebSocket
+- Real-Time
+tags_raw:
+- Company
+- Trading
+- Exchange
+- Perpetual Futures
+- Market Data
+- Attention Economy
+- Fintech
+- WebSocket
 - Real Time
 maintainers:
 - FN: Kin Lane
@@ -142,6 +152,8 @@ apis:
   humanURL: https://docs.forum.market/api-reference/introduction
   baseURL: https://api.forum.market/v1
   tags:
+  - Order
+  tags_raw:
   - Orders
   properties:
   - type: OpenAPI
