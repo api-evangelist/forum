@@ -8,8 +8,20 @@ info:
     order, then read the resulting account and position. Public steps need no
     auth; order/account steps require a `trade`/`read` API key (HMAC-SHA256).
 sourceDescriptions:
-- name: forumApi
-  url: ../openapi/forum-openapi-original.yml
+- name: accountApi
+  url: ../openapi/forum-account-api-openapi.yml
+  type: openapi
+- name: exchangeApi
+  url: ../openapi/forum-exchange-api-openapi.yml
+  type: openapi
+- name: marketsApi
+  url: ../openapi/forum-markets-api-openapi.yml
+  type: openapi
+- name: ordersApi
+  url: ../openapi/forum-orders-api-openapi.yml
+  type: openapi
+- name: positionsApi
+  url: ../openapi/forum-positions-api-openapi.yml
   type: openapi
 workflows:
 - workflowId: discoverAndPlaceOrder
