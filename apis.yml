@@ -13,6 +13,18 @@ description: >-
   funding updates. Authentication is HMAC-SHA256 request signing with read/trade
   API-key permissions, and the docs ship an agent-native discovery surface
   (llms.txt, agent-card, agent-skills, and a documentation MCP server).
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: true
+  label: Hosted service · you call their endpoint
+  confidence: high
+  source:
+  - openapi
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 accessModel:
   pricing: unknown
   onboarding: self-serve
