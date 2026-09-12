@@ -187,6 +187,8 @@ apis:
   - type: AsyncAPI
     url: asyncapi/forum-websocket-asyncapi.yml
 common:
+- type: Website
+  url: https://www.forum.market/
 - type: DeveloperPortal
   url: https://docs.forum.market/
 - type: Documentation
