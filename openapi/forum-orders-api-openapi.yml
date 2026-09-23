@@ -1,6 +1,6 @@
-openapi: 3.1.0
+openapi: 3.2.0
 info:
-  title: Forum Account Orders API
+  title: Forum Orders API
   version: '1.0'
   description: 'The Forum API provides programmatic access to the Forum perpetual futures exchange.
 
@@ -21,9 +21,7 @@ info:
     Private endpoints (orders, positions, account) require HMAC-SHA256 signed requests.
 
 
-    See the [Authentication](/api-reference/authentication) guide for details.
-
-    '
+    See the Authentication guide for details.'
   contact:
     name: Forum Support
     email: contact@forum.market
@@ -328,93 +326,7 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
 components:
-  responses:
-    Forbidden:
-      description: Insufficient permissions
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: INSUFFICIENT_PERMISSIONS
-              message: API key lacks required permission
-    NotFound:
-      description: Resource not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: NOT_FOUND
-              message: Resource not found
-    RateLimited:
-      description: Rate limit exceeded
-      headers:
-        Retry-After:
-          schema:
-            type: integer
-          description: Seconds to wait before retrying
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: RATE_LIMIT_EXCEEDED
-              message: Rate limit exceeded. Try again in 5 seconds.
-    BadRequest:
-      description: Invalid request parameters
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: INVALID_PARAMETER
-              message: Request validation failed
-              details:
-                fields:
-                - field: ticker
-                  message: Required
-    Unauthorized:
-      description: Missing or invalid authentication
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: UNAUTHORIZED
-              message: Missing or invalid authentication
-    InternalError:
-      description: Internal server error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: INTERNAL_ERROR
-              message: An unexpected error occurred
   schemas:
-    BatchCancelRequest:
-      type: object
-      required:
-      - orderIds
-      properties:
-        orderIds:
-          type: array
-          description: Order IDs
-          minItems: 1
-          maxItems: 20
-          items:
-            type: integer
-          example:
-          - 123
-          - 456
-          - 789
     ErrorResponse:
       type: object
       required:
@@ -441,119 +353,6 @@ components:
                 fields:
                 - field: ticker
                   message: Required
-    CreateOrderRequest:
-      type: object
-      required:
-      - ticker
-      - side
-      - qty
-      - orderType
-      properties:
-        ticker:
-          type: string
-          description: Market ticker symbol
-          example: OPENAI
-        side:
-          type: string
-          enum:
-          - buy
-          - sell
-          example: buy
-        qty:
-          type: number
-          description: Order quantity (positive)
-          example: 10
-        price:
-          type: number
-          description: Limit price in cents. Required for limit orders, must not be set for market orders.
-          example: 10050
-        orderType:
-          type: string
-          enum:
-          - market
-          - limit
-          description: '- `market`: Execute immediately at best available price
-
-            - `limit`: Place at a specific price
-
-            '
-          example: limit
-        timeInForce:
-          type: string
-          enum:
-          - goodTillCancel
-          - fillOrKill
-          - fillAndKill
-          description: 'Time-in-force policy. Required for limit orders, must not be set for market orders.
-
-            - `goodTillCancel`: Rests on the book until filled or cancelled
-
-            - `fillOrKill`: Must fill entirely immediately or be cancelled
-
-            - `fillAndKill`: Fill as much as possible immediately, cancel remainder
-
-            '
-          example: goodTillCancel
-        clientOrderId:
-          type: string
-          description: Client-generated order ID for idempotency and tracking
-          example: my-order-001
-        postOnly:
-          type: boolean
-          default: false
-          description: Reject if the order would match immediately (maker-only). Only valid for limit orders with goodTillCancel time-in-force.
-          example: false
-        reduceOnly:
-          type: boolean
-          default: false
-          description: Order can only reduce an existing position
-          example: false
-        selfTradePreventionMode:
-          type: string
-          enum:
-          - cr
-          - ci
-          - cb
-          default: cr
-          description: 'Self-trade prevention mode:
-
-            - `cr`: Cancel resting order
-
-            - `ci`: Cancel incoming order
-
-            - `cb`: Cancel both orders
-
-            '
-          example: cr
-    CancelAllResult:
-      type: object
-      required:
-      - cancelled
-      - orders
-      properties:
-        cancelled:
-          type: integer
-          description: Number of orders cancelled
-          example: 3
-        orders:
-          type: array
-          items:
-            $ref: '#/components/schemas/OrderRecord'
-    PaginatedOrders:
-      type: object
-      required:
-      - data
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/OrderRecord'
-        nextCursor:
-          type:
-          - string
-          - 'null'
-          description: Cursor for the next page. Null if no more results.
-          example: abc123
     BatchCreateRequest:
       type: object
       required:
@@ -565,47 +364,6 @@ components:
           maxItems: 10
           items:
             $ref: '#/components/schemas/CreateOrderRequest'
-    BatchCancelResult:
-      type: object
-      required:
-      - cancellations
-      properties:
-        cancellations:
-          type: array
-          items:
-            type: object
-            required:
-            - orderId
-            - success
-            properties:
-              orderId:
-                type: integer
-                example: 123
-              success:
-                type: boolean
-                example: true
-              error:
-                type: string
-                description: Error message if cancellation failed
-    BatchCreateResult:
-      type: object
-      required:
-      - orders
-      properties:
-        orders:
-          type: array
-          items:
-            type: object
-            properties:
-              clientOrderId:
-                type: string
-                example: my-order-001
-              order:
-                $ref: '#/components/schemas/OrderRecord'
-              error:
-                type: string
-                description: Error message if this individual order failed
-                example: Insufficient margin
     OrderRecord:
       type: object
       required:
@@ -728,6 +486,246 @@ components:
           - ci
           - cb
           example: cr
+    BatchCancelResult:
+      type: object
+      required:
+      - cancellations
+      properties:
+        cancellations:
+          type: array
+          items:
+            type: object
+            required:
+            - orderId
+            - success
+            properties:
+              orderId:
+                type: integer
+                example: 123
+              success:
+                type: boolean
+                example: true
+              error:
+                type: string
+                description: Error message if cancellation failed
+    BatchCancelRequest:
+      type: object
+      required:
+      - orderIds
+      properties:
+        orderIds:
+          type: array
+          description: Order IDs
+          minItems: 1
+          maxItems: 20
+          items:
+            type: integer
+          example:
+          - 123
+          - 456
+          - 789
+    PaginatedOrders:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderRecord'
+        nextCursor:
+          type:
+          - string
+          - 'null'
+          description: Cursor for the next page. Null if no more results.
+          example: abc123
+    BatchCreateResult:
+      type: object
+      required:
+      - orders
+      properties:
+        orders:
+          type: array
+          items:
+            type: object
+            properties:
+              clientOrderId:
+                type: string
+                example: my-order-001
+              order:
+                $ref: '#/components/schemas/OrderRecord'
+              error:
+                type: string
+                description: Error message if this individual order failed
+                example: Insufficient margin
+    CancelAllResult:
+      type: object
+      required:
+      - cancelled
+      - orders
+      properties:
+        cancelled:
+          type: integer
+          description: Number of orders cancelled
+          example: 3
+        orders:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderRecord'
+    CreateOrderRequest:
+      type: object
+      required:
+      - ticker
+      - side
+      - qty
+      - orderType
+      properties:
+        ticker:
+          type: string
+          description: Market ticker symbol
+          example: OPENAI
+        side:
+          type: string
+          enum:
+          - buy
+          - sell
+          example: buy
+        qty:
+          type: number
+          description: Order quantity (positive)
+          example: 10
+        price:
+          type: number
+          description: Limit price in cents. Required for limit orders, must not be set for market orders.
+          example: 10050
+        orderType:
+          type: string
+          enum:
+          - market
+          - limit
+          description: '- `market`: Execute immediately at best available price
+
+            - `limit`: Place at a specific price
+
+            '
+          example: limit
+        timeInForce:
+          type: string
+          enum:
+          - goodTillCancel
+          - fillOrKill
+          - fillAndKill
+          description: 'Time-in-force policy. Required for limit orders, must not be set for market orders.
+
+            - `goodTillCancel`: Rests on the book until filled or cancelled
+
+            - `fillOrKill`: Must fill entirely immediately or be cancelled
+
+            - `fillAndKill`: Fill as much as possible immediately, cancel remainder
+
+            '
+          example: goodTillCancel
+        clientOrderId:
+          type: string
+          description: Client-generated order ID for idempotency and tracking
+          example: my-order-001
+        postOnly:
+          type: boolean
+          default: false
+          description: Reject if the order would match immediately (maker-only). Only valid for limit orders with goodTillCancel time-in-force.
+          example: false
+        reduceOnly:
+          type: boolean
+          default: false
+          description: Order can only reduce an existing position
+          example: false
+        selfTradePreventionMode:
+          type: string
+          enum:
+          - cr
+          - ci
+          - cb
+          default: cr
+          description: 'Self-trade prevention mode:
+
+            - `cr`: Cancel resting order
+
+            - `ci`: Cancel incoming order
+
+            - `cb`: Cancel both orders
+
+            '
+          example: cr
+  responses:
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: INSUFFICIENT_PERMISSIONS
+              message: API key lacks required permission
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: RATE_LIMIT_EXCEEDED
+              message: Rate limit exceeded. Try again in 5 seconds.
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: INVALID_PARAMETER
+              message: Request validation failed
+              details:
+                fields:
+                - field: ticker
+                  message: Required
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: NOT_FOUND
+              message: Resource not found
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: INTERNAL_ERROR
+              message: An unexpected error occurred
+    Unauthorized:
+      description: Missing or invalid authentication
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: UNAUTHORIZED
+              message: Missing or invalid authentication
   parameters:
     ClientOrderIdPath:
       name: clientOrderId

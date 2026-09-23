@@ -1,6 +1,6 @@
-openapi: 3.1.0
+openapi: 3.2.0
 info:
-  title: Forum Account Market Data API
+  title: Forum Market Data API
   version: '1.0'
   description: 'The Forum API provides programmatic access to the Forum perpetual futures exchange.
 
@@ -21,9 +21,7 @@ info:
     Private endpoints (orders, positions, account) require HMAC-SHA256 signed requests.
 
 
-    See the [Authentication](/api-reference/authentication) guide for details.
-
-    '
+    See the Authentication guide for details.'
   contact:
     name: Forum Support
     email: contact@forum.market
@@ -170,41 +168,6 @@ paths:
           $ref: '#/components/responses/RateLimited'
 components:
   schemas:
-    PublicTrade:
-      type: object
-      required:
-      - tradeId
-      - ticker
-      - price
-      - quantity
-      - takerSide
-      - timestamp
-      properties:
-        tradeId:
-          type: integer
-          description: Unique trade identifier
-          example: 5678
-        ticker:
-          type: string
-          example: OPENAI
-        price:
-          type: number
-          description: Trade price in cents
-          example: 10550
-        quantity:
-          type: number
-          example: 5
-        takerSide:
-          type: string
-          enum:
-          - buy
-          - sell
-          description: Side of the taker order
-          example: buy
-        timestamp:
-          type: string
-          format: date-time
-          example: '2026-02-25T12:00:00.100Z'
     ErrorResponse:
       type: object
       required:
@@ -264,6 +227,55 @@ components:
           format: date-time
           description: Last update timestamp (ISO 8601)
           example: '2026-02-25T12:00:00.000Z'
+    BookLevel:
+      type: object
+      required:
+      - price
+      - qty
+      properties:
+        price:
+          type: number
+          description: Price level in cents
+          example: 10500
+        qty:
+          type: number
+          description: Total quantity at this price level
+          example: 10
+    PublicTrade:
+      type: object
+      required:
+      - tradeId
+      - ticker
+      - price
+      - quantity
+      - takerSide
+      - timestamp
+      properties:
+        tradeId:
+          type: integer
+          description: Unique trade identifier
+          example: 5678
+        ticker:
+          type: string
+          example: OPENAI
+        price:
+          type: number
+          description: Trade price in cents
+          example: 10550
+        quantity:
+          type: number
+          example: 5
+        takerSide:
+          type: string
+          enum:
+          - buy
+          - sell
+          description: Side of the taker order
+          example: buy
+        timestamp:
+          type: string
+          format: date-time
+          example: '2026-02-25T12:00:00.100Z'
     CandlestickRecord:
       type: object
       required:
@@ -316,45 +328,7 @@ components:
           type: boolean
           description: Whether this candle is still in its active period
           example: true
-    BookLevel:
-      type: object
-      required:
-      - price
-      - qty
-      properties:
-        price:
-          type: number
-          description: Price level in cents
-          example: 10500
-        qty:
-          type: number
-          description: Total quantity at this price level
-          example: 10
   responses:
-    NotFound:
-      description: Resource not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: NOT_FOUND
-              message: Resource not found
-    BadRequest:
-      description: Invalid request parameters
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: INVALID_PARAMETER
-              message: Request validation failed
-              details:
-                fields:
-                - field: ticker
-                  message: Required
     RateLimited:
       description: Rate limit exceeded
       headers:
@@ -370,6 +344,30 @@ components:
             error:
               code: RATE_LIMIT_EXCEEDED
               message: Rate limit exceeded. Try again in 5 seconds.
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: INVALID_PARAMETER
+              message: Request validation failed
+              details:
+                fields:
+                - field: ticker
+                  message: Required
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: NOT_FOUND
+              message: Resource not found
   parameters:
     TickerPath:
       name: ticker

@@ -1,6 +1,6 @@
-openapi: 3.1.0
+openapi: 3.2.0
 info:
-  title: Forum Account Indices API
+  title: Forum Indices API
   version: '1.0'
   description: 'The Forum API provides programmatic access to the Forum perpetual futures exchange.
 
@@ -21,9 +21,7 @@ info:
     Private endpoints (orders, positions, account) require HMAC-SHA256 signed requests.
 
 
-    See the [Authentication](/api-reference/authentication) guide for details.
-
-    '
+    See the Authentication guide for details.'
   contact:
     name: Forum Support
     email: contact@forum.market
@@ -141,43 +139,54 @@ components:
                 fields:
                 - field: ticker
                   message: Required
-    IndexHistoryRecord:
+    SourceMetric:
       type: object
       required:
-      - id
-      - name
-      - value
-      - raw
-      - timestamp
-      - sourceValues
+      - shortName
+      - displayName
+      - weight
+      - type
+      - frequency
+      - hasHistory
       properties:
-        id:
-          type: integer
-          example: 123
-        name:
+        shortName:
           type: string
-          example: OPENAI-IDX
-        value:
-          type: number
-          description: Index value after EMA applied
-          example: 100.5
-        raw:
-          type: number
-          description: Raw index value before EMA
-          example: 100.3
-        timestamp:
+          example: new_videos
+        displayName:
           type: string
-          format: date-time
-          example: '2026-02-25T00:00:00.000Z'
-        sourceValues:
+          example: New videos
+        weight:
+          type: number
+          minimum: 0
+          maximum: 1
+          example: 0.7
+        type:
+          type: string
+          enum:
+          - raw
+          - difference
+          description: Type of metric. Difference requires computing a delta (e.g., change in followers)
+          example: raw
+        curr:
           type: object
-          additionalProperties:
-            type: number
-          description: Per-source values at this timestamp before weighted sum and EMA
-          example:
-            youtube: 50
-            x: 30
-            reddit: 20.5
+          properties:
+            value:
+              type: number
+              description: Latest value before transformation
+              example: 100000
+            diff:
+              type: number
+              description: Latest delta before transformation (only applies for metrics of type `difference`)
+              example: 500
+        frequency:
+          type: number
+          description: Update frequency in seconds
+          example: 3600
+        hasHistory:
+          type: boolean
+          example: true
+        metadata:
+          type: object
     SourceConfig:
       type: object
       required:
@@ -255,54 +264,43 @@ components:
           - number
           - 'null'
           example: 0.32
-    SourceMetric:
+    IndexHistoryRecord:
       type: object
       required:
-      - shortName
-      - displayName
-      - weight
-      - type
-      - frequency
-      - hasHistory
+      - id
+      - name
+      - value
+      - raw
+      - timestamp
+      - sourceValues
       properties:
-        shortName:
+        id:
+          type: integer
+          example: 123
+        name:
           type: string
-          example: new_videos
-        displayName:
-          type: string
-          example: New videos
-        weight:
+          example: OPENAI-IDX
+        value:
           type: number
-          minimum: 0
-          maximum: 1
-          example: 0.7
-        type:
-          type: string
-          enum:
-          - raw
-          - difference
-          description: Type of metric. Difference requires computing a delta (e.g., change in followers)
-          example: raw
-        curr:
-          type: object
-          properties:
-            value:
-              type: number
-              description: Latest value before transformation
-              example: 100000
-            diff:
-              type: number
-              description: Latest delta before transformation (only applies for metrics of type `difference`)
-              example: 500
-        frequency:
+          description: Index value after EMA applied
+          example: 100.5
+        raw:
           type: number
-          description: Update frequency in seconds
-          example: 3600
-        hasHistory:
-          type: boolean
-          example: true
-        metadata:
+          description: Raw index value before EMA
+          example: 100.3
+        timestamp:
+          type: string
+          format: date-time
+          example: '2026-02-25T00:00:00.000Z'
+        sourceValues:
           type: object
+          additionalProperties:
+            type: number
+          description: Per-source values at this timestamp before weighted sum and EMA
+          example:
+            youtube: 50
+            x: 30
+            reddit: 20.5
     IndexRecord:
       type: object
       required:
@@ -360,6 +358,15 @@ components:
           type: boolean
           description: Whether the index is actively updating
           example: true
+  parameters:
+    IndexNamePath:
+      name: name
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Index name
+      example: OPENAI-IDX
   responses:
     RateLimited:
       description: Rate limit exceeded
@@ -390,15 +397,6 @@ components:
                 fields:
                 - field: ticker
                   message: Required
-  parameters:
-    IndexNamePath:
-      name: name
-      in: path
-      required: true
-      schema:
-        type: string
-      description: Index name
-      example: OPENAI-IDX
   securitySchemes:
     ForumAccessKey:
       type: apiKey

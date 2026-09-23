@@ -1,15 +1,7 @@
 {
   "provider": "forum",
   "sources": [
-    "forum-account-api-openapi.yml",
-    "forum-exchange-api-openapi.yml",
-    "forum-fills-api-openapi.yml",
-    "forum-funding-api-openapi.yml",
-    "forum-indices-api-openapi.yml",
-    "forum-market-data-api-openapi.yml",
-    "forum-markets-api-openapi.yml",
-    "forum-orders-api-openapi.yml",
-    "forum-positions-api-openapi.yml"
+    "_original/forum-openapi-original.yml"
   ],
   "outputs": [
     "forum-account-api-openapi.yml",
@@ -25,6 +17,20 @@
   "archived": [],
   "errors": [],
   "warnings": [],
-  "notes": [],
-  "skipped": []
+  "notes": [
+    "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
+    "forum-openapi-original.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "apis.yml register: already-registered"
+  ],
+  "skipped": [
+    "forum-account-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "forum-exchange-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "forum-fills-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "forum-funding-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "forum-indices-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "forum-market-data-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "forum-markets-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "forum-orders-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "forum-positions-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
 }
