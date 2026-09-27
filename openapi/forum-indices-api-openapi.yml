@@ -113,80 +113,63 @@ paths:
           $ref: '#/components/responses/RateLimited'
 components:
   schemas:
-    ErrorResponse:
+    IndexRecord:
       type: object
       required:
-      - error
+      - name
+      - createdAt
+      - sources
+      - sourceConfigs
+      - interval
+      - ready
+      - live
       properties:
-        error:
-          type: object
-          required:
-          - code
-          - message
-          properties:
-            code:
-              type: string
-              description: Machine-readable error code
-              example: INVALID_PARAMETER
-            message:
-              type: string
-              description: Human-readable error message
-              example: Request validation failed
-            details:
-              type: object
-              description: Additional error details
-              example:
-                fields:
-                - field: ticker
-                  message: Required
-    SourceMetric:
-      type: object
-      required:
-      - shortName
-      - displayName
-      - weight
-      - type
-      - frequency
-      - hasHistory
-      properties:
-        shortName:
+        name:
           type: string
-          example: new_videos
-        displayName:
+          description: Index identifier
+          example: OPENAI-IDX
+        createdAt:
           type: string
-          example: New videos
-        weight:
+          format: date-time
+          example: '2025-01-01T00:00:00.000Z'
+        lastUpdate:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: Last time the index was updated
+          example: '2026-02-25T12:00:00.000Z'
+        currentValue:
+          type:
+          - number
+          - 'null'
+          description: Current computed index value
+          example: 100.5
+        sources:
+          type: array
+          items:
+            type: string
+          description: List of source platform names
+          example:
+          - youtube
+          - x
+          - reddit
+        sourceConfigs:
+          type: array
+          items:
+            $ref: '#/components/schemas/SourceConfig'
+        interval:
           type: number
-          minimum: 0
-          maximum: 1
-          example: 0.7
-        type:
-          type: string
-          enum:
-          - raw
-          - difference
-          description: Type of metric. Difference requires computing a delta (e.g., change in followers)
-          example: raw
-        curr:
-          type: object
-          properties:
-            value:
-              type: number
-              description: Latest value before transformation
-              example: 100000
-            diff:
-              type: number
-              description: Latest delta before transformation (only applies for metrics of type `difference`)
-              example: 500
-        frequency:
-          type: number
-          description: Update frequency in seconds
+          description: Update interval in seconds
           example: 3600
-        hasHistory:
+        ready:
           type: boolean
+          description: Whether sufficient metric data has been collected for the index to be listed
           example: true
-        metadata:
-          type: object
+        live:
+          type: boolean
+          description: Whether the index is actively updating
+          example: true
     SourceConfig:
       type: object
       required:
@@ -301,72 +284,80 @@ components:
             youtube: 50
             x: 30
             reddit: 20.5
-    IndexRecord:
+    ErrorResponse:
       type: object
       required:
-      - name
-      - createdAt
-      - sources
-      - sourceConfigs
-      - interval
-      - ready
-      - live
+      - error
       properties:
-        name:
+        error:
+          type: object
+          required:
+          - code
+          - message
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code
+              example: INVALID_PARAMETER
+            message:
+              type: string
+              description: Human-readable error message
+              example: Request validation failed
+            details:
+              type: object
+              description: Additional error details
+              example:
+                fields:
+                - field: ticker
+                  message: Required
+    SourceMetric:
+      type: object
+      required:
+      - shortName
+      - displayName
+      - weight
+      - type
+      - frequency
+      - hasHistory
+      properties:
+        shortName:
           type: string
-          description: Index identifier
-          example: OPENAI-IDX
-        createdAt:
+          example: new_videos
+        displayName:
           type: string
-          format: date-time
-          example: '2025-01-01T00:00:00.000Z'
-        lastUpdate:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: Last time the index was updated
-          example: '2026-02-25T12:00:00.000Z'
-        currentValue:
-          type:
-          - number
-          - 'null'
-          description: Current computed index value
-          example: 100.5
-        sources:
-          type: array
-          items:
-            type: string
-          description: List of source platform names
-          example:
-          - youtube
-          - x
-          - reddit
-        sourceConfigs:
-          type: array
-          items:
-            $ref: '#/components/schemas/SourceConfig'
-        interval:
+          example: New videos
+        weight:
           type: number
-          description: Update interval in seconds
+          minimum: 0
+          maximum: 1
+          example: 0.7
+        type:
+          type: string
+          enum:
+          - raw
+          - difference
+          description: Type of metric. Difference requires computing a delta (e.g., change in followers)
+          example: raw
+        curr:
+          type: object
+          properties:
+            value:
+              type: number
+              description: Latest value before transformation
+              example: 100000
+            diff:
+              type: number
+              description: Latest delta before transformation (only applies for metrics of type `difference`)
+              example: 500
+        frequency:
+          type: number
+          description: Update frequency in seconds
           example: 3600
-        ready:
+        hasHistory:
           type: boolean
-          description: Whether sufficient metric data has been collected for the index to be listed
           example: true
-        live:
-          type: boolean
-          description: Whether the index is actively updating
-          example: true
-  parameters:
-    IndexNamePath:
-      name: name
-      in: path
-      required: true
-      schema:
-        type: string
-      description: Index name
-      example: OPENAI-IDX
+        metadata:
+          type: object
   responses:
     RateLimited:
       description: Rate limit exceeded
@@ -397,6 +388,15 @@ components:
                 fields:
                 - field: ticker
                   message: Required
+  parameters:
+    IndexNamePath:
+      name: name
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Index name
+      example: OPENAI-IDX
   securitySchemes:
     ForumAccessKey:
       type: apiKey

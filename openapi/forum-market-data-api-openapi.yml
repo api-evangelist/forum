@@ -168,6 +168,72 @@ paths:
           $ref: '#/components/responses/RateLimited'
 components:
   schemas:
+    CandlestickRecord:
+      type: object
+      required:
+      - ticker
+      - interval
+      - start
+      - open
+      - high
+      - low
+      - close
+      - volume
+      - active
+      properties:
+        ticker:
+          type: string
+          example: OPENAI
+        interval:
+          type: string
+          enum:
+          - 1m
+          - 5m
+          - 1d
+          example: 1m
+        start:
+          type: string
+          format: date-time
+          description: Candle period start time
+          example: '2026-02-25T12:00:00.000Z'
+        open:
+          type: number
+          description: Opening price in cents
+          example: 10500
+        high:
+          type: number
+          description: Highest price in cents
+          example: 10600
+        low:
+          type: number
+          description: Lowest price in cents
+          example: 10450
+        close:
+          type: number
+          description: Closing price in cents
+          example: 10550
+        volume:
+          type: number
+          description: Volume in cents
+          example: 150
+        active:
+          type: boolean
+          description: Whether this candle is still in its active period
+          example: true
+    BookLevel:
+      type: object
+      required:
+      - price
+      - qty
+      properties:
+        price:
+          type: number
+          description: Price level in cents
+          example: 10500
+        qty:
+          type: number
+          description: Total quantity at this price level
+          example: 10
     ErrorResponse:
       type: object
       required:
@@ -227,20 +293,6 @@ components:
           format: date-time
           description: Last update timestamp (ISO 8601)
           example: '2026-02-25T12:00:00.000Z'
-    BookLevel:
-      type: object
-      required:
-      - price
-      - qty
-      properties:
-        price:
-          type: number
-          description: Price level in cents
-          example: 10500
-        qty:
-          type: number
-          description: Total quantity at this price level
-          example: 10
     PublicTrade:
       type: object
       required:
@@ -276,58 +328,6 @@ components:
           type: string
           format: date-time
           example: '2026-02-25T12:00:00.100Z'
-    CandlestickRecord:
-      type: object
-      required:
-      - ticker
-      - interval
-      - start
-      - open
-      - high
-      - low
-      - close
-      - volume
-      - active
-      properties:
-        ticker:
-          type: string
-          example: OPENAI
-        interval:
-          type: string
-          enum:
-          - 1m
-          - 5m
-          - 1d
-          example: 1m
-        start:
-          type: string
-          format: date-time
-          description: Candle period start time
-          example: '2026-02-25T12:00:00.000Z'
-        open:
-          type: number
-          description: Opening price in cents
-          example: 10500
-        high:
-          type: number
-          description: Highest price in cents
-          example: 10600
-        low:
-          type: number
-          description: Lowest price in cents
-          example: 10450
-        close:
-          type: number
-          description: Closing price in cents
-          example: 10550
-        volume:
-          type: number
-          description: Volume in cents
-          example: 150
-        active:
-          type: boolean
-          description: Whether this candle is still in its active period
-          example: true
   responses:
     RateLimited:
       description: Rate limit exceeded

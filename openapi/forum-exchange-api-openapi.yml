@@ -74,56 +74,6 @@ paths:
           $ref: '#/components/responses/RateLimited'
 components:
   schemas:
-    MaintenanceWindow:
-      type: object
-      required:
-      - declaredAt
-      - startTime
-      - endTime
-      properties:
-        declaredAt:
-          type: string
-          format: date-time
-          example: '2026-02-24T12:00:00.000Z'
-        startTime:
-          type: string
-          format: date-time
-          example: '2026-02-25T00:00:00.000Z'
-        endTime:
-          type: string
-          format: date-time
-          example: '2026-02-25T02:00:00.000Z'
-        reason:
-          type:
-          - string
-          - 'null'
-          example: Scheduled maintenance
-    ErrorResponse:
-      type: object
-      required:
-      - error
-      properties:
-        error:
-          type: object
-          required:
-          - code
-          - message
-          properties:
-            code:
-              type: string
-              description: Machine-readable error code
-              example: INVALID_PARAMETER
-            message:
-              type: string
-              description: Human-readable error message
-              example: Request validation failed
-            details:
-              type: object
-              description: Additional error details
-              example:
-                fields:
-                - field: ticker
-                  message: Required
     ServerTime:
       type: object
       required:
@@ -158,6 +108,56 @@ components:
           - $ref: '#/components/schemas/MaintenanceWindow'
           - type: 'null'
           description: Next scheduled maintenance window
+    ErrorResponse:
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          required:
+          - code
+          - message
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code
+              example: INVALID_PARAMETER
+            message:
+              type: string
+              description: Human-readable error message
+              example: Request validation failed
+            details:
+              type: object
+              description: Additional error details
+              example:
+                fields:
+                - field: ticker
+                  message: Required
+    MaintenanceWindow:
+      type: object
+      required:
+      - declaredAt
+      - startTime
+      - endTime
+      properties:
+        declaredAt:
+          type: string
+          format: date-time
+          example: '2026-02-24T12:00:00.000Z'
+        startTime:
+          type: string
+          format: date-time
+          example: '2026-02-25T00:00:00.000Z'
+        endTime:
+          type: string
+          format: date-time
+          example: '2026-02-25T02:00:00.000Z'
+        reason:
+          type:
+          - string
+          - 'null'
+          example: Scheduled maintenance
   responses:
     RateLimited:
       description: Rate limit exceeded
