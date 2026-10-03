@@ -112,64 +112,63 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
 components:
+  responses:
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: RATE_LIMIT_EXCEEDED
+              message: Rate limit exceeded. Try again in 5 seconds.
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: INVALID_PARAMETER
+              message: Request validation failed
+              details:
+                fields:
+                - field: ticker
+                  message: Required
   schemas:
-    IndexRecord:
+    ErrorResponse:
       type: object
       required:
-      - name
-      - createdAt
-      - sources
-      - sourceConfigs
-      - interval
-      - ready
-      - live
+      - error
       properties:
-        name:
-          type: string
-          description: Index identifier
-          example: OPENAI-IDX
-        createdAt:
-          type: string
-          format: date-time
-          example: '2025-01-01T00:00:00.000Z'
-        lastUpdate:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: Last time the index was updated
-          example: '2026-02-25T12:00:00.000Z'
-        currentValue:
-          type:
-          - number
-          - 'null'
-          description: Current computed index value
-          example: 100.5
-        sources:
-          type: array
-          items:
-            type: string
-          description: List of source platform names
-          example:
-          - youtube
-          - x
-          - reddit
-        sourceConfigs:
-          type: array
-          items:
-            $ref: '#/components/schemas/SourceConfig'
-        interval:
-          type: number
-          description: Update interval in seconds
-          example: 3600
-        ready:
-          type: boolean
-          description: Whether sufficient metric data has been collected for the index to be listed
-          example: true
-        live:
-          type: boolean
-          description: Whether the index is actively updating
-          example: true
+        error:
+          type: object
+          required:
+          - code
+          - message
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code
+              example: INVALID_PARAMETER
+            message:
+              type: string
+              description: Human-readable error message
+              example: Request validation failed
+            details:
+              type: object
+              description: Additional error details
+              example:
+                fields:
+                - field: ticker
+                  message: Required
     SourceConfig:
       type: object
       required:
@@ -247,6 +246,63 @@ components:
           - number
           - 'null'
           example: 0.32
+    IndexRecord:
+      type: object
+      required:
+      - name
+      - createdAt
+      - sources
+      - sourceConfigs
+      - interval
+      - ready
+      - live
+      properties:
+        name:
+          type: string
+          description: Index identifier
+          example: OPENAI-IDX
+        createdAt:
+          type: string
+          format: date-time
+          example: '2025-01-01T00:00:00.000Z'
+        lastUpdate:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: Last time the index was updated
+          example: '2026-02-25T12:00:00.000Z'
+        currentValue:
+          type:
+          - number
+          - 'null'
+          description: Current computed index value
+          example: 100.5
+        sources:
+          type: array
+          items:
+            type: string
+          description: List of source platform names
+          example:
+          - youtube
+          - x
+          - reddit
+        sourceConfigs:
+          type: array
+          items:
+            $ref: '#/components/schemas/SourceConfig'
+        interval:
+          type: number
+          description: Update interval in seconds
+          example: 3600
+        ready:
+          type: boolean
+          description: Whether sufficient metric data has been collected for the index to be listed
+          example: true
+        live:
+          type: boolean
+          description: Whether the index is actively updating
+          example: true
     IndexHistoryRecord:
       type: object
       required:
@@ -284,32 +340,6 @@ components:
             youtube: 50
             x: 30
             reddit: 20.5
-    ErrorResponse:
-      type: object
-      required:
-      - error
-      properties:
-        error:
-          type: object
-          required:
-          - code
-          - message
-          properties:
-            code:
-              type: string
-              description: Machine-readable error code
-              example: INVALID_PARAMETER
-            message:
-              type: string
-              description: Human-readable error message
-              example: Request validation failed
-            details:
-              type: object
-              description: Additional error details
-              example:
-                fields:
-                - field: ticker
-                  message: Required
     SourceMetric:
       type: object
       required:
@@ -358,36 +388,6 @@ components:
           example: true
         metadata:
           type: object
-  responses:
-    RateLimited:
-      description: Rate limit exceeded
-      headers:
-        Retry-After:
-          schema:
-            type: integer
-          description: Seconds to wait before retrying
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: RATE_LIMIT_EXCEEDED
-              message: Rate limit exceeded. Try again in 5 seconds.
-    BadRequest:
-      description: Invalid request parameters
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: INVALID_PARAMETER
-              message: Request validation failed
-              details:
-                fields:
-                - field: ticker
-                  message: Required
   parameters:
     IndexNamePath:
       name: name

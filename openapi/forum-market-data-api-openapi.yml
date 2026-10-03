@@ -167,7 +167,141 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
 components:
+  responses:
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: RATE_LIMIT_EXCEEDED
+              message: Rate limit exceeded. Try again in 5 seconds.
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: NOT_FOUND
+              message: Resource not found
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: INVALID_PARAMETER
+              message: Request validation failed
+              details:
+                fields:
+                - field: ticker
+                  message: Required
   schemas:
+    OrderBook:
+      type: object
+      required:
+      - ticker
+      - bids
+      - asks
+      - seq
+      - updatedAt
+      properties:
+        ticker:
+          type: string
+          example: OPENAI
+        bids:
+          type: array
+          maxItems: 100
+          description: Bid levels sorted by descending price in cents
+          items:
+            $ref: '#/components/schemas/BookLevel'
+        asks:
+          type: array
+          maxItems: 100
+          description: Ask levels sorted by ascending price in cents
+          items:
+            $ref: '#/components/schemas/BookLevel'
+        seq:
+          type: integer
+          description: Sequence number for gap detection
+          example: 12345
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp (ISO 8601)
+          example: '2026-02-25T12:00:00.000Z'
+    ErrorResponse:
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          required:
+          - code
+          - message
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code
+              example: INVALID_PARAMETER
+            message:
+              type: string
+              description: Human-readable error message
+              example: Request validation failed
+            details:
+              type: object
+              description: Additional error details
+              example:
+                fields:
+                - field: ticker
+                  message: Required
+    PublicTrade:
+      type: object
+      required:
+      - tradeId
+      - ticker
+      - price
+      - quantity
+      - takerSide
+      - timestamp
+      properties:
+        tradeId:
+          type: integer
+          description: Unique trade identifier
+          example: 5678
+        ticker:
+          type: string
+          example: OPENAI
+        price:
+          type: number
+          description: Trade price in cents
+          example: 10550
+        quantity:
+          type: number
+          example: 5
+        takerSide:
+          type: string
+          enum:
+          - buy
+          - sell
+          description: Side of the taker order
+          example: buy
+        timestamp:
+          type: string
+          format: date-time
+          example: '2026-02-25T12:00:00.100Z'
     CandlestickRecord:
       type: object
       required:
@@ -234,140 +368,6 @@ components:
           type: number
           description: Total quantity at this price level
           example: 10
-    ErrorResponse:
-      type: object
-      required:
-      - error
-      properties:
-        error:
-          type: object
-          required:
-          - code
-          - message
-          properties:
-            code:
-              type: string
-              description: Machine-readable error code
-              example: INVALID_PARAMETER
-            message:
-              type: string
-              description: Human-readable error message
-              example: Request validation failed
-            details:
-              type: object
-              description: Additional error details
-              example:
-                fields:
-                - field: ticker
-                  message: Required
-    OrderBook:
-      type: object
-      required:
-      - ticker
-      - bids
-      - asks
-      - seq
-      - updatedAt
-      properties:
-        ticker:
-          type: string
-          example: OPENAI
-        bids:
-          type: array
-          maxItems: 100
-          description: Bid levels sorted by descending price in cents
-          items:
-            $ref: '#/components/schemas/BookLevel'
-        asks:
-          type: array
-          maxItems: 100
-          description: Ask levels sorted by ascending price in cents
-          items:
-            $ref: '#/components/schemas/BookLevel'
-        seq:
-          type: integer
-          description: Sequence number for gap detection
-          example: 12345
-        updatedAt:
-          type: string
-          format: date-time
-          description: Last update timestamp (ISO 8601)
-          example: '2026-02-25T12:00:00.000Z'
-    PublicTrade:
-      type: object
-      required:
-      - tradeId
-      - ticker
-      - price
-      - quantity
-      - takerSide
-      - timestamp
-      properties:
-        tradeId:
-          type: integer
-          description: Unique trade identifier
-          example: 5678
-        ticker:
-          type: string
-          example: OPENAI
-        price:
-          type: number
-          description: Trade price in cents
-          example: 10550
-        quantity:
-          type: number
-          example: 5
-        takerSide:
-          type: string
-          enum:
-          - buy
-          - sell
-          description: Side of the taker order
-          example: buy
-        timestamp:
-          type: string
-          format: date-time
-          example: '2026-02-25T12:00:00.100Z'
-  responses:
-    RateLimited:
-      description: Rate limit exceeded
-      headers:
-        Retry-After:
-          schema:
-            type: integer
-          description: Seconds to wait before retrying
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: RATE_LIMIT_EXCEEDED
-              message: Rate limit exceeded. Try again in 5 seconds.
-    BadRequest:
-      description: Invalid request parameters
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: INVALID_PARAMETER
-              message: Request validation failed
-              details:
-                fields:
-                - field: ticker
-                  message: Required
-    NotFound:
-      description: Resource not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: NOT_FOUND
-              message: Resource not found
   parameters:
     TickerPath:
       name: ticker

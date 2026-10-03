@@ -105,6 +105,16 @@ components:
             error:
               code: RATE_LIMIT_EXCEEDED
               message: Rate limit exceeded. Try again in 5 seconds.
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: NOT_FOUND
+              message: Resource not found
     Unauthorized:
       description: Missing or invalid authentication
       content:
@@ -125,17 +135,16 @@ components:
             error:
               code: INSUFFICIENT_PERMISSIONS
               message: API key lacks required permission
-    NotFound:
-      description: Resource not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: NOT_FOUND
-              message: Resource not found
   schemas:
+    PositionsResponse:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PositionRecord'
     ErrorResponse:
       type: object
       required:
@@ -162,15 +171,6 @@ components:
                 fields:
                 - field: ticker
                   message: Required
-    PositionsResponse:
-      type: object
-      required:
-      - data
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/PositionRecord'
     PositionRecord:
       type: object
       required:

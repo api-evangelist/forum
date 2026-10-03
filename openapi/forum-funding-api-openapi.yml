@@ -133,23 +133,6 @@ components:
                 - field: ticker
                   message: Required
   schemas:
-    FundingHistoryRecord:
-      type: object
-      required:
-      - ticker
-      - fundingRate
-      - timestamp
-      properties:
-        ticker:
-          type: string
-          example: OPENAI
-        fundingRate:
-          type: number
-          example: 0.0001
-        timestamp:
-          type: string
-          format: date-time
-          example: '2026-02-25T00:00:00.000Z'
     ErrorResponse:
       type: object
       required:
@@ -176,6 +159,23 @@ components:
                 fields:
                 - field: ticker
                   message: Required
+    FundingHistoryRecord:
+      type: object
+      required:
+      - ticker
+      - fundingRate
+      - timestamp
+      properties:
+        ticker:
+          type: string
+          example: OPENAI
+        fundingRate:
+          type: number
+          example: 0.0001
+        timestamp:
+          type: string
+          format: date-time
+          example: '2026-02-25T00:00:00.000Z'
     FundingRateInfo:
       type: object
       required:
