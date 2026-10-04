@@ -73,23 +73,46 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
 components:
-  responses:
-    RateLimited:
-      description: Rate limit exceeded
-      headers:
-        Retry-After:
-          schema:
-            type: integer
-          description: Seconds to wait before retrying
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: RATE_LIMIT_EXCEEDED
-              message: Rate limit exceeded. Try again in 5 seconds.
   schemas:
+    ServerTime:
+      type: object
+      required:
+      - epoch
+      - iso
+      properties:
+        epoch:
+          type: integer
+          description: Unix timestamp in seconds
+          example: 1740441600
+        iso:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp
+          example: '2026-02-25T00:00:00.000Z'
+    MaintenanceWindow:
+      type: object
+      required:
+      - declaredAt
+      - startTime
+      - endTime
+      properties:
+        declaredAt:
+          type: string
+          format: date-time
+          example: '2026-02-24T12:00:00.000Z'
+        startTime:
+          type: string
+          format: date-time
+          example: '2026-02-25T00:00:00.000Z'
+        endTime:
+          type: string
+          format: date-time
+          example: '2026-02-25T02:00:00.000Z'
+        reason:
+          type:
+          - string
+          - 'null'
+          example: Scheduled maintenance
     ErrorResponse:
       type: object
       required:
@@ -116,21 +139,6 @@ components:
                 fields:
                 - field: ticker
                   message: Required
-    ServerTime:
-      type: object
-      required:
-      - epoch
-      - iso
-      properties:
-        epoch:
-          type: integer
-          description: Unix timestamp in seconds
-          example: 1740441600
-        iso:
-          type: string
-          format: date-time
-          description: ISO 8601 timestamp
-          example: '2026-02-25T00:00:00.000Z'
     ExchangeStatus:
       type: object
       required:
@@ -150,30 +158,22 @@ components:
           - $ref: '#/components/schemas/MaintenanceWindow'
           - type: 'null'
           description: Next scheduled maintenance window
-    MaintenanceWindow:
-      type: object
-      required:
-      - declaredAt
-      - startTime
-      - endTime
-      properties:
-        declaredAt:
-          type: string
-          format: date-time
-          example: '2026-02-24T12:00:00.000Z'
-        startTime:
-          type: string
-          format: date-time
-          example: '2026-02-25T00:00:00.000Z'
-        endTime:
-          type: string
-          format: date-time
-          example: '2026-02-25T02:00:00.000Z'
-        reason:
-          type:
-          - string
-          - 'null'
-          example: Scheduled maintenance
+  responses:
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: RATE_LIMIT_EXCEEDED
+              message: Rate limit exceeded. Try again in 5 seconds.
   securitySchemes:
     ForumAccessKey:
       type: apiKey

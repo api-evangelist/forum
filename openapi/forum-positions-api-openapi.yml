@@ -90,21 +90,6 @@ paths:
           $ref: '#/components/responses/RateLimited'
 components:
   responses:
-    RateLimited:
-      description: Rate limit exceeded
-      headers:
-        Retry-After:
-          schema:
-            type: integer
-          description: Seconds to wait before retrying
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: RATE_LIMIT_EXCEEDED
-              message: Rate limit exceeded. Try again in 5 seconds.
     NotFound:
       description: Resource not found
       content:
@@ -135,42 +120,22 @@ components:
             error:
               code: INSUFFICIENT_PERMISSIONS
               message: API key lacks required permission
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: RATE_LIMIT_EXCEEDED
+              message: Rate limit exceeded. Try again in 5 seconds.
   schemas:
-    PositionsResponse:
-      type: object
-      required:
-      - data
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/PositionRecord'
-    ErrorResponse:
-      type: object
-      required:
-      - error
-      properties:
-        error:
-          type: object
-          required:
-          - code
-          - message
-          properties:
-            code:
-              type: string
-              description: Machine-readable error code
-              example: INVALID_PARAMETER
-            message:
-              type: string
-              description: Human-readable error message
-              example: Request validation failed
-            details:
-              type: object
-              description: Additional error details
-              example:
-                fields:
-                - field: ticker
-                  message: Required
     PositionRecord:
       type: object
       required:
@@ -228,6 +193,41 @@ components:
           type: number
           description: Snapshot of the market's `cumFunding` at the time the position's quantity last changed. See `cumFunding` in the `GET /markets/{ticker}` response for how accrued funding is computed.
           example: 0.0023
+    PositionsResponse:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PositionRecord'
+    ErrorResponse:
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          required:
+          - code
+          - message
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code
+              example: INVALID_PARAMETER
+            message:
+              type: string
+              description: Human-readable error message
+              example: Request validation failed
+            details:
+              type: object
+              description: Additional error details
+              example:
+                fields:
+                - field: ticker
+                  message: Required
   parameters:
     TickerPath:
       name: ticker

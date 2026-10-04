@@ -326,94 +326,29 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
 components:
-  responses:
-    RateLimited:
-      description: Rate limit exceeded
-      headers:
-        Retry-After:
-          schema:
-            type: integer
-          description: Seconds to wait before retrying
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: RATE_LIMIT_EXCEEDED
-              message: Rate limit exceeded. Try again in 5 seconds.
-    NotFound:
-      description: Resource not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: NOT_FOUND
-              message: Resource not found
-    InternalError:
-      description: Internal server error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: INTERNAL_ERROR
-              message: An unexpected error occurred
-    Unauthorized:
-      description: Missing or invalid authentication
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: UNAUTHORIZED
-              message: Missing or invalid authentication
-    BadRequest:
-      description: Invalid request parameters
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: INVALID_PARAMETER
-              message: Request validation failed
-              details:
-                fields:
-                - field: ticker
-                  message: Required
-    Forbidden:
-      description: Insufficient permissions
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            error:
-              code: INSUFFICIENT_PERMISSIONS
-              message: API key lacks required permission
-  parameters:
-    OrderIdPath:
-      name: orderId
-      in: path
-      required: true
-      schema:
-        type: integer
-      description: Order ID
-      example: 12345
-    ClientOrderIdPath:
-      name: clientOrderId
-      in: path
-      required: true
-      schema:
-        type: string
-      description: Client-provided order ID
-      example: my-order-001
   schemas:
+    BatchCancelResult:
+      type: object
+      required:
+      - cancellations
+      properties:
+        cancellations:
+          type: array
+          items:
+            type: object
+            required:
+            - orderId
+            - success
+            properties:
+              orderId:
+                type: integer
+                example: 123
+              success:
+                type: boolean
+                example: true
+              error:
+                type: string
+                description: Error message if cancellation failed
     CancelAllResult:
       type: object
       required:
@@ -428,21 +363,25 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OrderRecord'
-    PaginatedOrders:
+    BatchCreateResult:
       type: object
       required:
-      - data
+      - orders
       properties:
-        data:
+        orders:
           type: array
           items:
-            $ref: '#/components/schemas/OrderRecord'
-        nextCursor:
-          type:
-          - string
-          - 'null'
-          description: Cursor for the next page. Null if no more results.
-          example: abc123
+            type: object
+            properties:
+              clientOrderId:
+                type: string
+                example: my-order-001
+              order:
+                $ref: '#/components/schemas/OrderRecord'
+              error:
+                type: string
+                description: Error message if this individual order failed
+                example: Insufficient margin
     ErrorResponse:
       type: object
       required:
@@ -469,52 +408,6 @@ components:
                 fields:
                 - field: ticker
                   message: Required
-    BatchCreateResult:
-      type: object
-      required:
-      - orders
-      properties:
-        orders:
-          type: array
-          items:
-            type: object
-            properties:
-              clientOrderId:
-                type: string
-                example: my-order-001
-              order:
-                $ref: '#/components/schemas/OrderRecord'
-              error:
-                type: string
-                description: Error message if this individual order failed
-                example: Insufficient margin
-    BatchCreateRequest:
-      type: object
-      required:
-      - orders
-      properties:
-        orders:
-          type: array
-          minItems: 1
-          maxItems: 10
-          items:
-            $ref: '#/components/schemas/CreateOrderRequest'
-    BatchCancelRequest:
-      type: object
-      required:
-      - orderIds
-      properties:
-        orderIds:
-          type: array
-          description: Order IDs
-          minItems: 1
-          maxItems: 20
-          items:
-            type: integer
-          example:
-          - 123
-          - 456
-          - 789
     OrderRecord:
       type: object
       required:
@@ -637,28 +530,17 @@ components:
           - ci
           - cb
           example: cr
-    BatchCancelResult:
+    BatchCreateRequest:
       type: object
       required:
-      - cancellations
+      - orders
       properties:
-        cancellations:
+        orders:
           type: array
+          minItems: 1
+          maxItems: 10
           items:
-            type: object
-            required:
-            - orderId
-            - success
-            properties:
-              orderId:
-                type: integer
-                example: 123
-              success:
-                type: boolean
-                example: true
-              error:
-                type: string
-                description: Error message if cancellation failed
+            $ref: '#/components/schemas/CreateOrderRequest'
     CreateOrderRequest:
       type: object
       required:
@@ -743,6 +625,124 @@ components:
 
             '
           example: cr
+    PaginatedOrders:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderRecord'
+        nextCursor:
+          type:
+          - string
+          - 'null'
+          description: Cursor for the next page. Null if no more results.
+          example: abc123
+    BatchCancelRequest:
+      type: object
+      required:
+      - orderIds
+      properties:
+        orderIds:
+          type: array
+          description: Order IDs
+          minItems: 1
+          maxItems: 20
+          items:
+            type: integer
+          example:
+          - 123
+          - 456
+          - 789
+  parameters:
+    ClientOrderIdPath:
+      name: clientOrderId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Client-provided order ID
+      example: my-order-001
+    OrderIdPath:
+      name: orderId
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: Order ID
+      example: 12345
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: NOT_FOUND
+              message: Resource not found
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: INVALID_PARAMETER
+              message: Request validation failed
+              details:
+                fields:
+                - field: ticker
+                  message: Required
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: INTERNAL_ERROR
+              message: An unexpected error occurred
+    Unauthorized:
+      description: Missing or invalid authentication
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: UNAUTHORIZED
+              message: Missing or invalid authentication
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: RATE_LIMIT_EXCEEDED
+              message: Rate limit exceeded. Try again in 5 seconds.
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: INSUFFICIENT_PERMISSIONS
+              message: API key lacks required permission
   securitySchemes:
     ForumAccessKey:
       type: apiKey
