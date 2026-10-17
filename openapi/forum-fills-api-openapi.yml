@@ -99,21 +99,6 @@ paths:
           $ref: '#/components/responses/RateLimited'
 components:
   schemas:
-    PaginatedFills:
-      type: object
-      required:
-      - data
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/Fill'
-        nextCursor:
-          type:
-          - string
-          - 'null'
-          description: Cursor for the next page. Null if no more results.
-          example: abc123
     ErrorResponse:
       type: object
       required:
@@ -190,6 +175,21 @@ components:
           format: date-time
           description: Execution timestamp
           example: '2026-02-25T12:00:01.000Z'
+    PaginatedFills:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Fill'
+        nextCursor:
+          type:
+          - string
+          - 'null'
+          description: Cursor for the next page. Null if no more results.
+          example: abc123
   responses:
     Unauthorized:
       description: Missing or invalid authentication
