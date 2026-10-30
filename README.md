@@ -64,6 +64,175 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Forum is a company surfaced as a portfolio company of y-combinator and added to the API Evangelist network as a stub for enrichment. This profile is a lead awaiting the enrichment pipeline.
+Forum is a centralized exchange offering exposure to engagement-backed assets — "the first exchange to trade on attention." It turns online attention across social, search, and streaming data into measurable, tradable attention indices, then lists continuous perpetual-style futures contracts on top of them so participants can go long or short on cultural relevance as a new asset class. Forum (Y Combinator W26, based in New York City) exposes a full public developer surface: an OpenAPI 3.1 REST API at api.forum.market/v1 for market data, order management, positions, and account queries, and an AsyncAPI 3.0 WebSocket feed at wss://api.forum.market/ws/v1 for real-time order book, ticker, trade, index, and funding updates. Authentication is HMAC-SHA256 request signing with read/trade API-key permissions, and the docs ship an agent-native discovery surface (llms.txt, agent-card, agent-skills, and a documentation MCP server).
 
-Backed by: y-combinator
+**Areas:** Company · Trading · Exchange · Perpetual Futures · Market Data · Attention Economy · Fintech · WebSocket · Real-Time
+
+## Forum on APIs.io
+
+Everything profiled for Forum is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/forum/](https://apis.io/providers/forum/)** — or go straight to one of the APIs or properties below.
+
+### APIs (9)
+
+- [Forum Account API](https://apis.io/apis/forum/forum-account-api/) — Account summary and balance
+- [Forum Exchange API](https://apis.io/apis/forum/forum-exchange-api/) — Exchange status and server time
+- [Forum Fills API](https://apis.io/apis/forum/forum-fills-api/) — Trade execution history
+- [Forum Funding API](https://apis.io/apis/forum/forum-funding-api/) — Funding rates and history
+- [Forum Indices API](https://apis.io/apis/forum/forum-indices-api/) — Attention index values and history
+- [Forum Market Data API](https://apis.io/apis/forum/forum-market-data-api/) — Order books, tickers, trades, and candles
+- [Forum Markets API](https://apis.io/apis/forum/forum-markets-api/) — Market listings and details
+- [Forum Orders API](https://apis.io/apis/forum/forum-orders-api/) — Order placement, cancellation, and queries
+- [Forum Positions API](https://apis.io/apis/forum/forum-positions-api/) — Open position data
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### Arazzo workflows (1)
+
+Multi-step workflows that chain operations into a business task.
+
+- [Forum — discover a market and place an order](https://apis.io/arazzos/forum/forum-place-order/)
+
+#### AsyncAPI (1)
+
+Event-driven and webhook contracts.
+
+- [Forum WebSocket Feed](https://apis.io/asyncapis/forum/forum-websocket-asyncapi/)
+
+#### Event channels (19)
+
+Individual events and webhooks the provider emits.
+
+- [/](https://apis.io/channels/forum/auth/)
+- [bookUpdates](https://apis.io/channels/forum/bookupdates/)
+- [candleUpdates1d](https://apis.io/channels/forum/candleupdates1d/)
+- [candleUpdates1m](https://apis.io/channels/forum/candleupdates1m/)
+- [candleUpdates5m](https://apis.io/channels/forum/candleupdates5m/)
+- [/](https://apis.io/channels/forum/errors/)
+- [fundingEvents](https://apis.io/channels/forum/fundingevents/)
+- [heartbeat](https://apis.io/channels/forum/heartbeat/)
+- [indexUpdates](https://apis.io/channels/forum/indexupdates/)
+- [/](https://apis.io/channels/forum/listsubscriptions/)
+- [/](https://apis.io/channels/forum/logout/)
+- [/](https://apis.io/channels/forum/subscribe/)
+- [tickerUpdates](https://apis.io/channels/forum/tickerupdates/)
+- [trades](https://apis.io/channels/forum/trades/)
+- [/](https://apis.io/channels/forum/unsubscribe/)
+- [userAccount](https://apis.io/channels/forum/useraccount/)
+- [userFills](https://apis.io/channels/forum/userfills/)
+- [userOrders](https://apis.io/channels/forum/userorders/)
+- [userPositions](https://apis.io/channels/forum/userpositions/)
+
+#### MCP servers (1)
+
+Model Context Protocol servers that expose the API to agents.
+
+- [Forum Docs Docs MCP](https://apis.io/servers/forum/forum-docs-docs-mcp/)
+
+#### Agentic access (1)
+
+Which operations an agent can call, which act, and which need a human in the loop.
+
+- [Forum Agentic Access](https://apis.io/agentic-access/forum/forum-agentic-access/)
+
+#### Collections (9)
+
+Postman and Open Collection request collections.
+
+- [Forum Account API](https://apis.io/collections/forum/open-forum-account-api/)
+- [Forum Account Exchange API](https://apis.io/collections/forum/open-forum-exchange-api/)
+- [Forum Account Fills API](https://apis.io/collections/forum/open-forum-fills-api/)
+- [Forum Account Funding API](https://apis.io/collections/forum/open-forum-funding-api/)
+- [Forum Account Indices API](https://apis.io/collections/forum/open-forum-indices-api/)
+- [Forum Account Market Data API](https://apis.io/collections/forum/open-forum-market-data-api/)
+- [Forum Account Markets API](https://apis.io/collections/forum/open-forum-markets-api/)
+- [Forum Account Orders API](https://apis.io/collections/forum/open-forum-orders-api/)
+- [Forum Account Positions API](https://apis.io/collections/forum/open-forum-positions-api/)
+
+#### Overlays (1)
+
+OpenAPI overlays, including conversational phrasing for each operation.
+
+- [Forum Openapi Overlay](https://apis.io/overlays/forum/forum-openapi-overlay/)
+
+#### Security (2)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Forum Authentication](https://apis.io/security/forum/forum-authentication/)
+- [Forum Domain Security](https://apis.io/security/forum/forum-domain-security/)
+
+#### Rate limits (1)
+
+Published request limits.
+
+- [Forum Rate Limits](https://apis.io/rate-limits/forum/forum-rate-limits/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://www.forum.market/)
+- [Documentation](https://docs.forum.market/)
+- [Getting started](https://docs.forum.market/api-reference/quick-start)
+- [API reference](https://docs.forum.market/api-reference/introduction)
+- [Sign up](https://app.forum.market/)
+- [Support](https://docs.forum.market/guide/feedback)
+- [Blog](https://www.forum.market/blog/)
+- [Terms of service](https://forum-legal.s3.us-east-2.amazonaws.com/terms-of-service.pdf)
+
+## API Evangelist rating
+
+**Kin Score 38.3** — thin · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 75.0 |
+| Contract quality | 59.9 |
+| Contract governance | 4.5 |
+| Operational transparency | 55.3 |
+| Developer ergonomics | 21.4 |
+| Access clarity | 23.7 |
+
+**Agent readiness 42.3** — agent-native
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | derived (partial credit) |
+| Reversibility Documented | documented (partial credit) |
+| MCP Server | documented (partial credit) |
+| Auth Clarity | bearer (partial credit) |
+| Idempotency | documented (partial credit) |
+| Error Semantics | documented (partial credit) |
+| OpenAPI Examples | partial |
+| Rate Limit Signal | verified |
+| Event Surface Described | derived (partial credit) |
+| Agent Skills | yes |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | — |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+| Pagination Ratio | partial |
+| Operation Distinctiveness | distinct |
+
+**Regulatory alignment 19.4** — Securities & Market Data
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/forum/](https://apis.io/providers/forum/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Forum: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/forum/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
